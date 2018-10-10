@@ -13,11 +13,22 @@ while [ "$LOOP" = "yes" ] ; do
   case $PLATFORM in
     Generic)
       for PORT in /sys/class/drm/*/status ; do
-        STATUS=$(cat $PORT)
-        if [ "$STATUS" = "connected" ] ; then
-          CONNECTED=1
+        if [ -f $PORT ] ; then
+          STATUS=$(cat $PORT)
+          if [ "$STATUS" = "connected" ] ; then
+            CONNECTED=1
+          fi
         fi
       done
+      ;;
+    S912)
+      PORT=/sys/class/switch/hdmi/state
+      if [ -f $PORT ] ; then
+        STATUS=$(cat $PORT)
+        if [ $STATUS -eq 1 ] ; then
+          CONNECTED=1
+        fi
+      fi
       ;;
     *)
       CONNECTED=1
