@@ -184,6 +184,9 @@ post_makeinstall_target() {
   # remove networkd
   rm -rf $INSTALL/usr/lib/systemd/network
 
+  # tune system.conf
+  sed -e "s,^.*DumpCore=.*$,DumpCore=no,g" -i $INSTALL/etc/systemd/system.conf
+
   # tune journald.conf
   sed -e "s,^.*Compress=.*$,Compress=no,g" -i $INSTALL/etc/systemd/journald.conf
   sed -e "s,^.*SplitMode=.*$,SplitMode=none,g" -i $INSTALL/etc/systemd/journald.conf
