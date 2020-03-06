@@ -2,7 +2,10 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 # Handler for git
-# Usage (in package.mk):
+#
+# Usage:
+#
+# in package.mk:
 # PKG_URL (mandatory) must point to a git repository (git://... or https://example.com/repo.git)
 # PKG_VERSION (mandatory) must point to a commit SHA, e.g. a1b2c3d
 # PKG_GIT_SHA (optional) full hash of git commit
@@ -10,6 +13,11 @@
 # PKG_GIT_CLONE_SINGLE (optional) clone single branch only (set to yes)
 # PKG_GIT_CLONE_DEPTH (optional) history to clone, must be a number
 # PKG_GIT_SUBMODULE_DEPTH (optional) history of submodules to clone, must be a number
+#
+# in distro options/make flags:
+# GIT_MAKE_TARXZ [ yes | no / not set ] if .tar.xz files should be created as static package
+# DISTRO_GIT_MIRROR url to a mirror with statick packages
+# NO_GIT_MIRROR [ yes | no / not set ] temporary disable downloading of static packages
 
 _get_repo_already_downloaded() {
   if [ -d "${PACKAGE}" ]; then
@@ -33,13 +41,63 @@ _get_repo_clean() {
   git checkout -- .
 }
 
+# store original package path (folder for git clone)
+PACKAGE_ORIG="${PACKAGE}"
+
+if [ "${GIT_MAKE_TARXZ}" = "yes" ]; then
+  GIT_TARBALL="${1}-${PKG_VERSION}.tar.xz"
+  PACKAGE="${SOURCES}/{1}/${GIT_TARBALL}"
+  # is there already a local tarball?
+  [ -f "${PACKAGE}" ] && exit 0
+  # is there a tarball on the mirror
+  if [ -n "${DISTRO_GIT_MIRROR}" -a "${NO_GIT_MIRROR}" != "yes" ]; then
+
+    lock_source_dir "${1}"
+    build_msg "CLR_GET" "GET" "${1} (git-tarball)" "indent"
+
+    pkg_lock_status "GETPKG" "${PKG_NAME}" "unpack" "downloading git tarball..."
+
+    [ "${VERBOSE}" != "yes" ] && WGET_OPT=-q
+    WGET_URL=${DISTRO_GIT_MIRROR}/${1}/${GIT_TARBALL}
+    WGET_CMD="wget --output-file=- --timeout=30 --tries=3 --passive-ftp --no-check-certificate -c ${WGET_OPT} --progress=bar:force --show-progress -O ${PACKAGE}"
+
+    # unset LD_LIBRARY_PATH to stop wget from using toolchain/lib and loading libssl.so/libcrypto.so instead of host libraries
+    unset LD_LIBRARY_PATH
+
+    NBWGET=5
+    while [ ${NBWGET} -gt 0 ]; do
+      rm -f "${PACKAGE}"
+      if ${WGET_CMD} "${WGET_URL}"; then
+        exit 0
+      fi
+      NBWGET=$((NBWGET - 1))
+    done
+
+  fi
+  PACKAGE="${PACKAGE_ORIG}"
+fi
+
 # Latest file already present, exit now...
-_get_repo_already_downloaded && exit 0
+if _get_repo_already_downloaded then
+  [ -z "${GIT_MAKE_TARXZ}" -o "${GIT_MAKE_TARXZ" = "no" ] && exit 0
+  # create tarball
+  PACKAGE_ORIG="${PACKAGE}"
+  PACKAGE="${SOURCES}/{1}/${1}-${PKG_VERSION}.tar.xz"
+  tar -pcJf "${PACKAGE_ORIG}" "${PACKAGE}"
+  exit 0
+fi
 
 lock_source_dir "${1}"
 
 # Check again in case of concurrent access - if nothing needs to be downloaded, exit now...
-_get_repo_already_downloaded && exit 0
+if _get_repo_already_downloaded then
+  [ -z "${GIT_MAKE_TARXZ}" -o "${GIT_MAKE_TARXZ" = "no" ] && exit 0
+  # create tarball
+  PACKAGE_ORIG="${PACKAGE}"
+  PACKAGE="${SOURCES}/{1}/${1}-${PKG_VERSION}.tar.xz"
+  tar -pcJf "${PACKAGE_ORIG}" "${PACKAGE}"
+  exit 0
+fi
 
 # At this point, we need to download something...
 build_msg "CLR_GET" "GET" "${1} (git)" "indent"
@@ -71,6 +129,7 @@ if [ -n "${PKG_GIT_SUBMODULE_DEPTH}" ]; then
 fi
 
 GIT_FOUND="no"
+GIT_DIR=""
 opwd="$(pwd)"
 for d in "${SOURCES}/${1}/${1}-"* ; do
   if [ -d "${d}/.git" ]; then
@@ -98,8 +157,16 @@ for d in "${SOURCES}/${1}/${1}-"* ; do
         fi
         if [ "${GIT_FOUND}" = "yes" ]; then
           build_msg "CLR_GET" "GIT PULL" "${1}"
-          git pull
-          cd "${opwd}"
+          if [ git pull ]; then
+            cd "${opwd}"
+          # if pull fails, remove the folder and create eew clone (maybe due to forced push to the repository)
+          else
+            GIT_FOUND="no"
+            GIT_DIR=""
+            build_msg "CLR_CLEAN" "DELETE" "(${d})"
+            cd "${opwd}"
+            rm -rf "${d}"
+          fi
         fi
       else
         build_msg "CLR_CLEAN" "DELETE" "(${d})"
@@ -132,4 +199,11 @@ GIT_SHA="$(git ls-remote "${PACKAGE}" | grep -m1 HEAD | awk '{print $1;}')"
 
 if [ -n "${PKG_GIT_SHA}" -a "${PKG_GIT_SHA}" != "${GIT_SHA}" ]; then
   build_msg "CLR_WARNING" "WARNING" "Incorrect git hash in repository: got ${GIT_SHA}, wanted ${PKG_GIT_SHA}"
+fi
+
+if [ "${GIT_MAKE_TARXZ}" = "yes" ]; then
+  GIT_TARBALL="${1}-${PKG_VERSION}.tar.xz"
+  PACKAGE="${SOURCES}/{1}/${1}-${PKG_VERSION}.tar.xz"
+  build_msg "CLR_GET" "GIT TARBALL" "${1}"
+  tar -pcJf "${PACKAGE_ORIG}" "${PACKAGE}"
 fi
