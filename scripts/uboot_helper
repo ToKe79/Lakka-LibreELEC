@@ -289,6 +289,10 @@ devices = \
         'dtb': 'rk3399-orangepi.dtb',
         'config': 'evb-rk3399_defconfig'
       },
+      'rg552': {
+        'dtb': 'rk3399-rg552-linux.dtb',
+        'config': 'evb-rk3399_defconfig'
+      },
       'rock960': {
         'dtb': 'rk3399-rock960.dtb',
         'config': 'evb-rk3399_defconfig'
