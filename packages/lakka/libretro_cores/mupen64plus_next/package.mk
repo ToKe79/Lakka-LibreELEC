@@ -56,8 +56,8 @@ pre_make_target() {
     AMLGX)
       [ "${ARCH}" = "arm" ] && PKG_MAKE_OPTS_TARGET+=" platform=AMLGX-amlogic" || true
       ;;
-    OdroidGoAdvance)
-      PKG_MAKE_OPTS_TARGET+=" platform=odroid BOARD=ODROIDGOA"
+    RK3328)
+      [ "${ARCH}" = "arm" ] && PKG_MAKE_OPTS_TARGET+=" platform=odroid BOARD=ODROIDGOA" || true
       ;;
     RK3328)
       [ "${ARCH}" = "arm"] && PKG_MAKE_OPTS_TARGET+=" platform=RK3328" || true

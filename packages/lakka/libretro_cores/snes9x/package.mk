@@ -9,7 +9,7 @@ PKG_TOOLCHAIN="make"
 
 PKG_MAKE_OPTS_TARGET="-C libretro/"
 
-if [ "${DEVICE}" = "OdroidGoAdvance" ]; then
+if [ "${PROJECT}" = "Rockhip" -a "${DEVICE}" = "RK3328" -a "${ARCH}" = "arm" ]; then
   PKG_MAKE_OPTS_TARGET+=" platform=classic_armv8_a35"
 fi
 

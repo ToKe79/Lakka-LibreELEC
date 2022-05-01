@@ -279,6 +279,12 @@ devices = \
         'config': 'tinker-rk3288_defconfig'
       },
     },
+    'RK3326': {
+      'odroidgo2': {
+        'dtb': 'rk3326-odroid-go2.dtb',
+        'config': 'odroid-go2_defconfig'
+      },
+    },
     'RK3328': {
       'a1': {
         'dtb': 'rk3328-a1.dtb',

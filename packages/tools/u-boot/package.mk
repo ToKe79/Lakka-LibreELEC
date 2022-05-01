@@ -21,19 +21,16 @@ fi
 PKG_NEED_UNPACK="${PROJECT_DIR}/${PROJECT}/bootloader"
 [ -n "${DEVICE}" ] && PKG_NEED_UNPACK+=" ${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/bootloader"
 
-case "${PROJECT}" in
-  Rockchip)
-    PKG_VERSION="8659d08d2b589693d121c1298484e861b7dafc4f"
-    PKG_SHA256="3f9f2bbd0c28be6d7d6eb909823fee5728da023aca0ce37aef3c8f67d1179ec1"
-    PKG_URL="https://github.com/rockchip-linux/u-boot/archive/${PKG_VERSION}.tar.gz"
-    PKG_PATCH_DIRS="rockchip"
-    ;;
-  *)
-    PKG_VERSION="2022.04"
-    PKG_SHA256="68e065413926778e276ec3abd28bb32fa82abaa4a6898d570c1f48fbdb08bcd0"
-    PKG_URL="http://ftp.denx.de/pub/u-boot/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
-    ;;
-esac
+if [ "${PROJECT}" = "Rockchip" -a "${DEVICE}" != "RK3326" ]; then
+  PKG_VERSION="8659d08d2b589693d121c1298484e861b7dafc4f"
+  PKG_SHA256="3f9f2bbd0c28be6d7d6eb909823fee5728da023aca0ce37aef3c8f67d1179ec1"
+  PKG_URL="https://github.com/rockchip-linux/u-boot/archive/${PKG_VERSION}.tar.gz"
+  PKG_PATCH_DIRS="rockchip"
+else
+  PKG_VERSION="2022.04"
+  PKG_SHA256="68e065413926778e276ec3abd28bb32fa82abaa4a6898d570c1f48fbdb08bcd0"
+  PKG_URL="http://ftp.denx.de/pub/u-boot/${PKG_NAME}-${PKG_VERSION}.tar.bz2"
+fi
 
 post_patch() {
   if [ -n "${UBOOT_SYSTEM}" ] && find_file_path bootloader/config; then

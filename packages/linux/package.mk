@@ -36,6 +36,12 @@ case "${LINUX}" in
     #Need to find a better way to do this for l4t platforms!
     PKG_SHA256=$L4T_COMBINED_KERNEL_SHA256
     ;;
+  odroidgoA-4.4.y)
+    PKG_VERSION="faeb665a41b53ebb386e69fe737ccf0707aaf07b"
+    PKG_SHA256="bef15386f296b282e1e75ed78f14c7c0762058806da37854d09af642a15594ae"
+    PKG_URL="https://github.com/hardkernel/linux/archive/${PKG_VERSION}.tar.gz"
+    PKG_SOURCE_NAME="linux-${LINUX}-${PKG_VERSION}.tar.gz"
+    ;;
   *)
     PKG_VERSION="5.17.4"
     PKG_SHA256="6e3cd56ee83a9cb5ac3fde1442c40367ab67368946c4c93bbeb1c65664a0d3c5"

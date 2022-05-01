@@ -11,7 +11,7 @@ PKG_MAKE_OPTS_TARGET="-C ../backends/platform/libretro/build/"
 
 pre_make_target() {
   CXXFLAGS+=" -DHAVE_POSIX_MEMALIGN=1"
-  if [ "${DEVICE}" = "OdroidGoAdvance" ]; then
+  if [ "${PROJECT}" = "Rockchip" -a "${DEVICE}" = "RK3326" -a "${ARCH}" = "arm" ]; then
     PKG_MAKE_OPTS_TARGET+=" platform=oga_a35_neon_hardfloat"
   fi
 }

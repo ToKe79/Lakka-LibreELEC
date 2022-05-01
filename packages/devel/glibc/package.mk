@@ -35,8 +35,8 @@ PKG_CONFIGURE_OPTS_TARGET="BASH_SHELL=/bin/sh \
                            --disable-nscd \
                            --disable-timezone-tools"
 
-if [ "${PROJECT}" = "L4T" ]; then
-  PKG_CONFIGURE_OPTS_TARGET="${PKG_CONFIGURE_OPTS_TARGET//--enable-kernel=5.4.0/--enable-kernel=3.0.0/}"
+if [ "${PROJECT}" = "Rockchip" -a "${DEVICE}" = "RK3326" ]; then
+  PKG_CONFIGURE_OPTS_TARGET="${PKG_CONFIGURE_OPTS_TARGET//--enable-kernel=5.10.0/--enable-kernel=3.0.0}"
 fi
 
 if build_with_debug; then
