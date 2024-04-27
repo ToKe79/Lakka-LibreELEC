@@ -1,0 +1,17 @@
+diff --git a/lib/c-stack.c b/lib/c-stack.c
+index 5353c08..37bf81e 100644
+--- a/lib/c-stack.c
++++ b/lib/c-stack.c
+@@ -52,12 +52,6 @@ typedef struct sigaltstack stack_t;
+ #endif
+ #ifndef SIGSTKSZ
+ # define SIGSTKSZ 16384
+-#elif HAVE_LIBSIGSEGV && SIGSTKSZ < 16384
+-/* libsigsegv 2.6 through 2.8 have a bug where some architectures use
+-   more than the Linux default of an 8k alternate stack when deciding
+-   if a fault was caused by stack overflow.  */
+-# undef SIGSTKSZ
+-# define SIGSTKSZ 16384
+ #endif
+ 
+ #include <stdlib.h>
