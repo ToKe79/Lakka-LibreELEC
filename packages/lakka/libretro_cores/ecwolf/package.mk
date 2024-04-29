@@ -1,5 +1,5 @@
 PKG_NAME="ecwolf"
-PKG_VERSION="f098da0d003c4780adf6a9503801081f1f25cc27"
+PKG_VERSION="71ec64cf98ba0a2a94e2fede560f1b435761b36d"
 PKG_LICENSE="Unknown"
 PKG_SITE="https://github.com/libretro/ecwolf"
 PKG_URL="${PKG_SITE}.git"
@@ -16,15 +16,7 @@ pre_make_target() {
 makeinstall_target() {
   mkdir -p ${INSTALL}/usr/lib/libretro
     cp src/libretro/ecwolf_libretro.so ${INSTALL}/usr/lib/libretro/
-
-  if [ -z "$(which 7z 2>/dev/null)" ]; then
-    echo "************************************************************"
-    echo "*       !!! !!! !!! !!!   WARNING     !!! !!! !!! !!!      *"
-    echo "* No 7z archiver found on system, not packaging ecwolf.pk3 *"
-    echo "************************************************************"
-  else
+  mkdir -p ${INSTALL}/usr/share/retroarch/system
     echo "Packaging ecwolf.pk3..."
-    mkdir -p ${INSTALL}/usr/share/retroarch/system
-      7z a -mx9 -tzip ${INSTALL}/usr/share/retroarch/system/ecwolf.pk3 "${PKG_BUILD}/wadsrc/static/"* >/dev/null
-  fi
+    7z a -mx9 -tzip ${INSTALL}/usr/share/retroarch/system/ecwolf.pk3 "${PKG_BUILD}/wadsrc/static/"* >/dev/null
 }

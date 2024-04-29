@@ -1,11 +1,11 @@
 PKG_NAME="pcsx2"
-PKG_VERSION="1f88fb5e663ff8b516dbca00f81fac271333b4aa"
+PKG_VERSION="f3c8743d6a42fe429f703b476fecfdb5655a98a9"
 PKG_ARCH="x86_64"
 PKG_LICENSE="GPLv2"
-PKG_SITE="https://github.com/libretro/pcsx2"
+PKG_SITE="https://github.com/libretro/LRPS2"
 PKG_URL="${PKG_SITE}.git"
 PKG_DEPENDS_TARGET="libaio toolchain xz"
-PKG_LONGDESC="PCSX2 is a free and open-source PlayStation 2 (PS2) emulator"
+PKG_LONGDESC="LRPS2 is fork/port of PCSX2, a free and open-source PlayStation 2 (PS2) emulator"
 PKG_TOOLCHAIN="cmake"
 
 PKG_CMAKE_OPTS_TARGET="-DLIBRETRO=ON \
@@ -14,6 +14,19 @@ PKG_CMAKE_OPTS_TARGET="-DLIBRETRO=ON \
 
 if [ "${OPENGL_SUPPORT}" = yes ]; then
   PKG_DEPENDS_TARGET+=" ${OPENGL}"
+fi
+
+if [ "${OPENGLES_SUPPORT}" = yes ]; then
+  PKG_DEPENDS_TARGET+=" ${OPENGLES}"
+fi
+
+if [ "${VULKAN_SUPPORT}" = yes ]; then
+  PKG_DEPENDS_TARGET+=" ${VULKAN}"
+  if [ "${DISPLAYSERVER}" = x11 ]; then
+    PKG_CMAKE_OPTS_TARGET="-DVULKAN_USE_X11=ON"
+  elif [ "${DISPLAYSERVER}" = wl ]; then
+    PKG_CMAKE_OPTS_TARGET="-DVULKAN_USE_WAYLAND=ON"
+  fi
 fi
 
 pre_make_target() {
@@ -26,4 +39,3 @@ makeinstall_target() {
   mkdir -p ${INSTALL}/usr/lib/libretro
     cp -v pcsx2/pcsx2_libretro.so ${INSTALL}/usr/lib/libretro/
 }
-

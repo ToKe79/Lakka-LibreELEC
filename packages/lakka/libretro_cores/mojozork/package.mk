@@ -1,5 +1,5 @@
 PKG_NAME="mojozork"
-PKG_VERSION="e5eed8e7db672779391b3ce8fdebdefefb2fa52a"
+PKG_VERSION="5c8d81f8db53c206ace6952472e7a7e68bd8e752"
 PKG_LICENSE="zlib"
 PKG_SITE="https://github.com/icculus/mojozork"
 PKG_URL="${PKG_SITE}.git"
@@ -18,3 +18,4 @@ makeinstall_target() {
   mkdir -p ${INSTALL}/usr/lib/libretro
   cp -v ${PKG_BUILD}/.${TARGET_NAME}/mojozork_libretro.so ${INSTALL}/usr/lib/libretro/
 }
+

@@ -1,9 +1,10 @@
 PKG_NAME="mupen64plus_next"
-PKG_VERSION="5a63aadedc29655254d8fc7b4da3a325472e198b"
+PKG_VERSION="3f794eec4dc4af2f22ecce507f2da324381d3d92"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/libretro/mupen64plus-libretro-nx"
 PKG_URL="${PKG_SITE}.git"
 PKG_GIT_CLONE_BRANCH="develop"
+PKG_GIT_SKIP_SUBMODULE="yes"
 PKG_DEPENDS_TARGET="toolchain nasm:host"
 PKG_LONGDESC="mupen64plus_next + RSP-HLE + GLideN64 + libretro"
 
@@ -15,31 +16,7 @@ fi
 
 if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
   PKG_DEPENDS_TARGET+=" ${OPENGLES}"
-  case ${PROJECT} in
-    RPi)
-      if [ "${DEVICE:0:4}" = "RPi4" ]; then
-        PKG_MAKE_OPTS_TARGET+=" FORCE_GLES3=1"
-      else
-        PKG_MAKE_OPTS_TARGET+=" FORCE_GLES=1"
-      fi
-      ;;
-    Rockchip)
-      if [ "${DEVICE}" = "RK3328" ]; then
-        PKG_MAKE_OPTS_TARGET+=" FORCE_GLES=1"
-      else
-        PKG_MAKE_OPTS_TARGET+=" FORCE_GLES3=1"
-      fi
-      ;;
-    Amlogic)
-      PKG_MAKE_OPTS_TARGET+=" FORCE_GLES3=1"
-      ;;
-    Generic)
-      PKG_MAKE_OPTS_TARGET+=" FORCE_GLES3=1"
-      ;;
-    *)
-      PKG_MAKE_OPTS_TARGET+=" FORCE_GLES=1"
-      ;;
-  esac
+  PKG_MAKE_OPTS_TARGET+=" GLES=1 FORCE_GLES=1"
 fi
 
 if [ "${VULKAN_SUPPORT}" = "yes" ]; then
@@ -68,14 +45,20 @@ pre_make_target() {
     RPi3)
       PKG_MAKE_OPTS_TARGET+=" platform=rpi3_64-mesa"
       ;;
-    Pi02GPi)
+    RPiZero2-GPiCase)
       PKG_MAKE_OPTS_TARGET+=" platform=rpi3"
       ;;
-    RPi4*)
-      PKG_MAKE_OPTS_TARGET+=" platform=rpi4_64-mesa"
+    RPiZero2-GPiCase2W)
+      PKG_MAKE_OPTS_TARGET+=" platform=rpi3_64-mesa"
       ;;
-    OdroidXU3)
+    RPi4*)
+      PKG_MAKE_OPTS_TARGET+=" platform=rpi4_64-mesa FORCE_GLES3=1"
+      ;;
+    Exynos)
       PKG_MAKE_OPTS_TARGET+=" platform=odroid BOARD=ODROID-XU"
+      ;;
+    H6)
+      PKG_MAKE_OPTS_TARGET+=" platform=rpi3_64-mesa"
       ;;
     AMLGX)
       [ "${ARCH}" = "arm" ] && PKG_MAKE_OPTS_TARGET+=" platform=AMLGX-amlogic" || true

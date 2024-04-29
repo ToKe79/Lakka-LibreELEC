@@ -1,5 +1,5 @@
 PKG_NAME="flycast"
-PKG_VERSION="a5967a283f65ae12f31765ee27a70ec82073a226"
+PKG_VERSION="d46b181084f6abe3f31fa00740164ca8cf40751f"
 PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/flyinghead/flycast"
 PKG_URL="${PKG_SITE}.git"
@@ -17,7 +17,7 @@ fi
 
 if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
   PKG_DEPENDS_TARGET+=" ${OPENGLES}"
-  if [ "${DEVICE:0:4}" = "RPi4" ] || [ ${DEVICE} = "RK3288" ] || [ "${DEVICE}" = "RK3399" ]; then
+  if [[ ${DEVICE} =~ ^RPi[4|5].* ]] || [ ${DEVICE} = "RK3288" ] || [ "${DEVICE}" = "RK3399" ]; then
     # enable GLES3
     PKG_CMAKE_OPTS_TARGET+=" -DUSE_GLES=ON"
   else
@@ -29,6 +29,10 @@ fi
 if [ "${VULKAN_SUPPORT}" = yes ]; then
   PKG_DEPENDS_TARGET+=" ${VULKAN}"
   PKG_CMAKE_OPTS_TARGET+=" -DUSE_VULKAN=ON"
+fi
+
+if [ "${PROJECT}" = "RPi" -a "${DEVICE}" = "RPi5" ]; then
+  PKG_CMAKE_OPTS_TARGET+=" -DPAGE_SIZE=16384"
 fi
 
 pre_make_target() {

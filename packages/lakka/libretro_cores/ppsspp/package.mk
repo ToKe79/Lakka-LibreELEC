@@ -1,17 +1,17 @@
 PKG_NAME="ppsspp"
-PKG_VERSION="cd535263c1ad65fd03869591a8bd706680cbf04b"
-PKG_LICENSE="GPL-2.0-or-later"
+PKG_VERSION="d479b74ed9c3e321bc3735da29bc125a2ac3b9b2"
+PKG_LICENSE="GPLv2"
 PKG_SITE="https://github.com/hrydgard/ppsspp"
 PKG_URL="${PKG_SITE}.git"
-PKG_DEPENDS_TARGET="toolchain linux glibc libzip libpng zstd zlib ffmpeg bzip2 openssl speex"
-PKG_LONGDESC="A PSP emulator for Android, Windows, Mac, Linux and Blackberry 10, written in C++."
+PKG_DEPENDS_TARGET="toolchain glibc libzip libpng zstd zlib bzip2 openssl speex"
+PKG_LONGDESC="Libretro port of PPSSPP"
+PKG_TOOLCHAIN="cmake"
 PKG_LR_UPDATE_TAG="yes"
-PKG_BUILD_FLAGS="-sysroot"
 
 PKG_CMAKE_OPTS_TARGET="-DLIBRETRO=ON \
                        -DCMAKE_BUILD_TYPE=Release \
                        -DUSE_FFMPEG=ON \
-                       -DUSE_SYSTEM_FFMPEG=ON \
+                       -DUSE_SYSTEM_FFMPEG=OFF \
                        -DUSE_SYSTEM_LIBZIP=ON \
                        -DUSE_SYSTEM_LIBPNG=ON \
                        -DUSE_SYSTEM_ZSTD=ON \
@@ -34,6 +34,8 @@ if [ "${VULKAN_SUPPORT}" = "yes" ]; then
   else
     PKG_CMAKE_OPTS_TARGET+=" -DUSE_VULKAN_DISPLAY_KHR=ON -DUSING_X11_VULKAN=OFF"
   fi
+else
+  PKG_CMAKE_OPTS_TARGET+=" -DVULKAN=OFF"
 fi
 
 if [ "${OPENGL_SUPPORT}" = "no" -a "${OPENGLES_SUPPORT}" = "yes" ]; then
@@ -51,6 +53,10 @@ elif [ "${TARGET_ARCH}" = "aarch64" ]; then
 fi
 
 pre_make_target() {
+  # This script should work on any board that has issues with system ffmpeg in ppsspp
+  if [ "${ARCH}" = "aarch64" ]; then
+    . ${PKG_BUILD}/ffmpeg/linux_lakka.sh
+  fi
   find ${PKG_BUILD} -name flags.make -exec sed -i "s:isystem :I:g" \{} \;
   find ${PKG_BUILD} -name build.ninja -exec sed -i "s:isystem :I:g" \{} \;
 }

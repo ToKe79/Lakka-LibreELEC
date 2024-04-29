@@ -64,6 +64,7 @@ LIBRETRO_CORES="\
                 gearsystem \
                 genesis_plus_gx \
                 genesis_plus_gx_wide \
+                geolith \
                 gme \
                 gpsp \
                 gw_libretro \
@@ -87,6 +88,7 @@ LIBRETRO_CORES="\
                 mesen \
                 mesen_s \
                 mgba \
+                mgba_fork \
                 mojozork \
                 mrboom \
                 mu \
@@ -141,7 +143,9 @@ LIBRETRO_CORES="\
                 vbam \
                 vecx \
                 vice \
+                vircon32 \
                 virtualjaguar \
+                vitaquake2 \
                 vitaquake3 \
                 wasm4 \
                 xmil \
@@ -150,10 +154,10 @@ LIBRETRO_CORES="\
                 yabause \
                "
 
-# disable some cores
+# disable cores based on PROJECT/DEVICE
 if [ "${PROJECT}" = "RPi" ]; then
   EXCLUDE_LIBRETRO_CORES+=" yabasanshiro"
-  if [ "${DEVICE}" = "RPi" -o "${DEVICE}" = "GPICase" ]; then
+  if [ "${DEVICE}" = "RPi" -o "${DEVICE}" = "RPiZero-GPiCase" ]; then
     EXCLUDE_LIBRETRO_CORES+="\
                              beetle_bsnes \
                              beetle_psx \
@@ -178,7 +182,6 @@ if [ "${PROJECT}" = "RPi" ]; then
                              higan_sfc \
                              higan_sfc_balanced \
                              kronos \
-                             lr_moonlight \
                              mame \
                              mame2003_plus \
                              mame2010 \
@@ -202,34 +205,30 @@ if [ "${PROJECT}" = "RPi" ]; then
                              uae4arm \
                              vbam \
                              virtualjaguar \
+                             vircon32 \
+                             vitaquake2 \
                              yabause \
                             "
   elif [ "${DEVICE}" = "RPi2" ]; then
     EXCLUDE_LIBRETRO_CORES+=" play"
-  elif [ "${DEVICE}" = "Pi02GPi" ]; then
-    EXCLUDE_LIBRETRO_CORES+=" kronos lr_moonlight melonds openlara play"
+  elif [ "${DEVICE}" = "RPiZero2-GPiCase" ]; then
+    EXCLUDE_LIBRETRO_CORES+=" kronos openlara play ppsspp vircon32 swanstation"
+  elif [ "${DEVICE}" = "RPi3" ]; then
+    EXCLUDE_LIBRETRO_CORES+=" yabasanshiro"
   fi
 elif [ "${PROJECT}" = "Amlogic" -o "${PROJECT}" = "Rockchip" -o "${PROJECT}" = "Allwinner" ]; then
   EXCLUDE_LIBRETRO_CORES+=" yabasanshiro"
 elif [ "${PROJECT}" = "Generic" -a "${ARCH}" = "i386" ]; then
-  EXCLUDE_LIBRETRO_CORES+=" fake_08 lr_moonlight openlara"
+  EXCLUDE_LIBRETRO_CORES+=" fake_08 openlara"
 elif [ "${PROJECT}" = "Ayn" -a "${DEVICE}" = "Odin" ]; then
-  EXCLUDE_LIBRETRO_CORES+=" lr_moonlight"
-elif [ "${PROJECT}" = "L4T" -a "${DEVICE}" = "Switch" ]; then
-  EXCLUDE_LIBRETRO_CORES+=" kronos"
-fi
-
-if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
-  #Core doesnt work with OPENGLES builds, as nanogui doesnt have support for that
-  #Mental note fix OPENGLES in moonlight core gui/renderer.
   EXCLUDE_LIBRETRO_CORES+=" lr_moonlight"
 fi
 
 # disable cores that are only for specific targets
-# fbalpha2012 and mame2000 only for RPi/GPICase
+# fbalpha2012 and mame2000 only for RPi/RPiZero-GPiCase
 if [ "${PROJECT}" != "RPi" ]; then
   EXCLUDE_LIBRETRO_CORES+=" fbalpha2012 mame2000"
-elif [ "${DEVICE}" != "RPi" -a "${DEVICE}" != "GPICase" ]; then
+elif [ "${DEVICE}" != "RPi" -a "${DEVICE}" != "RPiZero-GPiCase" ]; then
   EXCLUDE_LIBRETRO_CORES+=" fbalpha2012 mame2000"
 fi
 # boom3 and vitaquake for now only for Switch
@@ -237,17 +236,37 @@ if [ "${PROJECT}" != "L4T" -a "${DEVICE}" != "Switch" ]; then
   EXCLUDE_LIBRETRO_CORES+=" boom3 vitaquake3"
 fi
 
-# exclude some cores at build time
+# lr_moonlight only for Switch
+if [ "${PROJECT}" != "L4T" -a "${DEVICE}" != "Switch" ]; then
+  EXCLUDE_LIBRETRO_CORES+=" lr_moonlight"
+fi
+
+# lr_moonlight does not currently build for Switch because of newer OpenSSL package (older package is not compatible with ffmpeg)
+if [ "${DEVICE}" = "Switch" ]; then
+  EXCLUDE_LIBRETRO_CORES+=" lr_moonlight"
+fi
+
+# disable cores that do not build for OPENGLES
+if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
+  EXCLUDE_LIBRETRO_CORES+=" kronos"
+fi
+
+# exclude some cores at build time via env EXCLUDE_LIBRETRO_CORES="..." passed to make
 if [ -n "${EXCLUDE_LIBRETRO_CORES}" ]; then
   for core in ${EXCLUDE_LIBRETRO_CORES} ; do
     LIBRETRO_CORES="${LIBRETRO_CORES// ${core} /}"
   done
 fi
 
-# override above with custom list
+# override above with custom list via env CUSTOM_LIBRETRO_CORES="..." passed to make
 if [ -n "${CUSTOM_LIBRETRO_CORES}" ]; then
   LIBRETRO_CORES="${CUSTOM_LIBRETRO_CORES}"
 fi
+
+# temporary disabled due to build errors for all targets
+for core in citra pcsx2 same_cdi ; do
+  LIBRETRO_CORES="${LIBRETRO_CORES// ${core} /}"
+done
 
 # finally set package dependencies
 PKG_DEPENDS_TARGET="${LIBRETRO_CORES}"

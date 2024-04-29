@@ -1,5 +1,5 @@
 PKG_NAME="pocketcdg"
-PKG_VERSION="afb88fb20b39e548b8a95791839f59b111892f21"
+PKG_VERSION="34913f755c92aa7c98668f291631c23e21d88bdc"
 PKG_LICENSE="MIT"
 PKG_SITE="https://github.com/libretro/libretro-pocketcdg"
 PKG_URL="${PKG_SITE}.git"
