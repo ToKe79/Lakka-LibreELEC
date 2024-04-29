@@ -312,6 +312,11 @@ makeinstall_target() {
     sed -i -e 's|^menu_driver =.*|menu_driver = "ozone"|' ${INSTALL}/etc/retroarch.cfg
   fi
 
+  # RPi*-Composite
+  if [ "${PROJECT}" = "RPi" -a "${DEVICE: -10}" = "-Composite" ]; then
+    echo 'audio_device = "default:CARD=Headphones"' >> ${INSTALL}/etc/retroarch.cfg
+  fi
+
   # iMX6
   if [ "${PROJECT}" = "NXP" -a "${DEVICE}" = "iMX6" ]; then
     echo 'audio_device = "default:CARD=DWHDMI"' >> ${INSTALL}/etc/retroarch.cfg
