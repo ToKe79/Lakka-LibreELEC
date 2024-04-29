@@ -48,7 +48,6 @@ makeinstall_target() {
 
     if [ "${DISTRO}" = "Lakka" ]; then
       echo "disable_splash=1" >> ${INSTALL}/usr/share/bootloader/distroconfig.txt
-      echo "dtparam=audio=on" >> ${INSTALL}/usr/share/bootloader/distroconfig.txt
       if [ "${DEVICE}" = "RPi4" -o "${DEVICE}" = "RPi4-PiBoyDmg" ]; then
         sed -e "s|^gpu_mem=.*$|gpu_mem=384|g" -i ${INSTALL}/usr/share/bootloader/config.txt
       elif [ "${DEVICE}" = "RPi4-RetroDreamer" ]; then
