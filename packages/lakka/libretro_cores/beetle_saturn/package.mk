@@ -1,7 +1,7 @@
 PKG_NAME="beetle_saturn"
 PKG_VERSION="8192ecca34d44f8f85175fa7b7fab6ec2ffb31c2"
 PKG_ARCH="x86_64"
-if [ "${PROJECT}" = "RPi" ] && [ "${DEVICE}" = "RPi5" ]; then
+if [ "${PROJECT}" = "RPi" ] && [ "${DEVICE:0:4}" = "RPi5" ]; then
   PKG_ARCH+=" aarch64"
 fi
 PKG_LICENSE="GPLv2"

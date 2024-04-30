@@ -14,7 +14,9 @@
           TARGET_CPU="cortex-a7"
         elif [ "${DEVICE}" = "Pi02GPi" ]; then
           TARGET_CPU="cortex-a53"
-        elif [ "${DEVICE:0:4}" = "RPi4" ]; then
+        elif [ "${DEVICE:0:4}" = "RPi4" -o "${DEVICE:0:4}" = "RPi5" ]; then
+          TARGET_KERNEL_ARCH="arm64"
+          TARGET_KERNEL_PATCH_ARCH="aarch64"
           TARGET_CPU="cortex-a53"
           TARGET_CPU_FLAGS="+crc"
           if [ "$DISTRO" = "Lakka" ]; then
@@ -38,13 +40,8 @@
           TARGET_FPU="vfp"
         elif [ "$DEVICE" = "RPi2" ]; then
           TARGET_FPU="neon-vfpv4"
-        elif [ "${DEVICE}" = "Pi02GPi" ]; then
+        elif [ "${DEVICE}" = "Pi02GPi" -o "${DEVICE:0:4}" = "RPi4" -o "${DEVICE:0:4}" = "RPi5" ]; then
           TARGET_FPU="neon-fp-armv8"
-        elif [ "${DEVICE:0:4}" = "RPi4" ]; then
-          TARGET_FPU="neon-fp-armv8"
-          if [ "$DISTRO" = "Lakka" ]; then
-             VULKAN="vulkan-loader"
-          fi
         fi
         TARGET_FEATURES="32bit"
 
@@ -59,7 +56,10 @@
           TARGET_CPU="cortex-a53"
         elif [ "${DEVICE:0:4}" = "RPi4" ]; then
           TARGET_CPU="cortex-a72"
-           VULKAN="vulkan-loader"
+          VULKAN="vulkan-loader"
+        elif [ "${DEVICE:0:4}" = "RPi5" ]; then
+          TARGET_CPU="cortex-a76"
+          VULKAN="vulkan-loader"
 	else 
           echo "${DEVICE} ${ARCH} not supported on ${DISTRO}!"
           exit 1
@@ -85,6 +85,10 @@
   # Kernel to use. values can be:
   # default:  default mainline kernel
     LINUX="raspberrypi"
+
+    if [ "${DEVICE:0:4}" = "RPi5" ]; then
+      LINUX="raspberrypi-6.6.y"
+    fi
 
 ################################################################################
 # setup build defaults

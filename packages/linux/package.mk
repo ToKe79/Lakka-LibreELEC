@@ -27,6 +27,12 @@ case "${LINUX}" in
     PKG_URL="https://github.com/raspberrypi/linux/archive/${PKG_VERSION}.tar.gz"
     PKG_SOURCE_NAME="linux-${LINUX}-${PKG_VERSION}.tar.gz"
     ;;
+  raspberrypi-6.6.y)
+    PKG_VERSION="8d40b03821362d445a03dc23475fc4dff3ba88a7" # 6.6.28
+    PKG_SHA256="47c36bb4e3e470f02b6be72afd0743d85bb1d7e0207d5e44bcf4522655fa5196"
+    PKG_URL="https://github.com/raspberrypi/linux/archive/${PKG_VERSION}.tar.gz"
+    PKG_SOURCE_NAME="linux-${LINUX}-${PKG_VERSION}.tar.gz"
+    ;;
   L4T)
     PKG_VERSION=${DEVICE}-${SWITCHROOT_VERSION}
     PKG_URL="l4t-kernel-sources"
@@ -121,6 +127,8 @@ make_host() {
 
      export PATH=${CURRENT_PATH}
   elif [ "${LINUX}" = "ayn-odin" ]; then
+    :
+  elif [ "${LINUX}" = "raspberrypi-6.6.y" ]; then
     :
   else
    make \
@@ -262,7 +270,7 @@ pre_make_target() {
   fi
 
   # enable Joycon and Dualsense on default and raspberrypi kernels for Lakka
-  if [ "${DISTRO}" = "Lakka" ] && [ "${LINUX}" = "default" -o "${LINUX}" = "raspberrypi" ]; then
+  if [ "${DISTRO}" = "Lakka" ] && [ "${LINUX}" = "default" -o "${LINUX:0:11}" = "raspberrypi" ]; then
     ${PKG_BUILD}/scripts/config \
                                 --enable CONFIG_HID_NINTENDO \
                                 --enable CONFIG_NINTENDO_FF \
@@ -423,6 +431,7 @@ make_target() {
         NO_GTK2=1 \
         NO_LIBNUMA=1 \
         NO_LIBAUDIT=1 \
+        NO_LIBTRACEEVENT=1 \
         NO_LZMA=1 \
         NO_SDT=1 \
         CROSS_COMPILE="${TARGET_PREFIX}" \

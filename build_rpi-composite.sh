@@ -78,6 +78,7 @@ fi
 targets="\
 	RPi|RPi3-Composite|aarch64|image \
 	RPi|RPi4-Composite|aarch64|image \
+	RPi|RPi5-Composite|aarch64|image \
 	"
 
 # set the number of total build jobs and initialize counter for current build job

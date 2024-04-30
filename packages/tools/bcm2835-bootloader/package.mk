@@ -17,13 +17,20 @@ if [ "${DISTRO}" = "Lakka" ]; then
   PKG_URL="https://github.com/raspberrypi/firmware/archive/refs/tags/${PKG_VERSION}.tar.gz"
 fi
 
+# for RPi5
+if [ "${DEVICE:0:4}" = "RPi5" ]; then
+  PKG_VERSION="5476720d52cf579dc1627715262b30ba1242525e"
+  PKG_SHA256="91430d6b50cd85e4cab0bd9ca12967a5f08b18b43ff4d9fed65676a932d7d302"
+  PKG_URL="${DISTRO_SRC}/${PKG_NAME}-${PKG_VERSION}.tar.xz"
+fi
+
 PKG_DEPENDS_TARGET="toolchain linux bcmstat"
 PKG_LONGDESC="bcm2835-bootloader: Tool to create a bootable kernel for RaspberryPi"
 PKG_TOOLCHAIN="manual"
 
 makeinstall_target() {
   # upstream repo stores the firmware file in 'boot' subfolder
-  if [ "${DISTRO}" = "Lakka" ]; then
+  if [ "${DISTRO}" = "Lakka" -a ! "${DEVICE:0:4}" = "RPi5" ]; then
     PKG_BOOT_FOLDER="boot"
   else
     PKG_BOOT_FOLDER="."
@@ -31,17 +38,25 @@ makeinstall_target() {
 
   mkdir -p ${INSTALL}/usr/share/bootloader
     cp -PRv ${PKG_BOOT_FOLDER}/LICENCE* ${INSTALL}/usr/share/bootloader
-    cp -PRv ${PKG_BOOT_FOLDER}/bootcode.bin ${INSTALL}/usr/share/bootloader
-    if [ "${DEVICE:0:4}" = "RPi4" ]; then
-      cp -PRv ${PKG_BOOT_FOLDER}/fixup4x.dat ${INSTALL}/usr/share/bootloader/fixup.dat
-      cp -PRv ${PKG_BOOT_FOLDER}/start4x.elf ${INSTALL}/usr/share/bootloader/start.elf
-    else
-      cp -PRv ${PKG_BOOT_FOLDER}/fixup_x.dat ${INSTALL}/usr/share/bootloader/fixup.dat
-      cp -PRv ${PKG_BOOT_FOLDER}/start_x.elf ${INSTALL}/usr/share/bootloader/start.elf
-    fi
+    case "${DEVICE}" in
+      RPi4*)
+        cp -PRv ${PKG_BOOT_FOLDER}/fixup4x.dat ${INSTALL}/usr/share/bootloader/fixup.dat
+        cp -PRv ${PKG_BOOT_FOLDER}/start4x.elf ${INSTALL}/usr/share/bootloader/start.elf
+        ;;
+      RPi5*)
+        ;;
+      *)
+        cp -PRv ${PKG_BOOT_FOLDER}/bootcode.bin ${INSTALL}/usr/share/bootloader
+        cp -PRv ${PKG_BOOT_FOLDER}/fixup_x.dat ${INSTALL}/usr/share/bootloader/fixup.dat
+        cp -PRv ${PKG_BOOT_FOLDER}/start_x.elf ${INSTALL}/usr/share/bootloader/start.elf
+    esac 
 
     find_file_path bootloader/update.sh ${PKG_DIR}/files/update.sh && cp -PRv ${FOUND_PATH} ${INSTALL}/usr/share/bootloader
-    find_file_path bootloader/canupdate.sh && cp -PRv ${FOUND_PATH} ${INSTALL}/usr/share/bootloader
+    if find_file_path bootloader/canupdate.sh; then
+      cp -PRv ${FOUND_PATH} ${INSTALL}/usr/share/bootloader
+      sed -e "s/@PROJECT@/${DEVICE:-${PROJECT}}/g" \
+          -i ${INSTALL}/usr/share/bootloader/canupdate.sh
+    fi
 
     find_file_path config/distroconfig.txt ${PKG_DIR}/files/distroconfig.txt && cp -PRv ${FOUND_PATH} ${INSTALL}/usr/share/bootloader
     find_file_path config/config.txt ${PKG_DIR}/files/config.txt && cp -PRv ${FOUND_PATH} ${INSTALL}/usr/share/bootloader

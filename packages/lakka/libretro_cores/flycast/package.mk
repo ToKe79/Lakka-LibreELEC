@@ -31,7 +31,7 @@ if [ "${VULKAN_SUPPORT}" = yes ]; then
   PKG_CMAKE_OPTS_TARGET+=" -DUSE_VULKAN=ON"
 fi
 
-if [ "${PROJECT}" = "RPi" -a "${DEVICE}" = "RPi5" ]; then
+if [ "${PROJECT}" = "RPi" -a "${DEVICE:0:4}" = "RPi5" ]; then
   PKG_CMAKE_OPTS_TARGET+=" -DPAGE_SIZE=16384"
 fi
 

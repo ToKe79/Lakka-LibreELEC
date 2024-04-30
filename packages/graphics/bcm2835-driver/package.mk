@@ -5,12 +5,16 @@
 PKG_NAME="bcm2835-driver"
 PKG_VERSION="53f4941b7bb2512e07fa7c6baec29cbee4889848"
 PKG_SHA256="4c4fff28f896358748575e09204c9da0b457b191a004b05b88cdafe99d8333e9"
+if [ "${DEVICE:0:4}" = "RPi5" ]; then
+  PKG_VERSION="2578acb89b6b40c483db537c4fd2eef593543fb8"
+  PKG_SHA256="2e352ed1c6ef704f19667b9f500f43e4bcdaaacd1ed3a9a6f44e72fb190bf10d"
+fi
 PKG_LICENSE="nonfree"
 PKG_SITE="http://www.broadcom.com"
 PKG_URL="${DISTRO_SRC}/${PKG_NAME}-${PKG_VERSION}.tar.xz"
 
 # for Lakka we use the upstream repo tag
-if [ "${DISTRO}" = "Lakka" ]; then
+if [ "${DISTRO}" = "Lakka" -a ! "${DEVICE:0:4}" = "RPi5" ]; then
   PKG_VERSION="1.20220308" # for kernel 5.10.103
   PKG_SHA256="70638d515fd16aee31a963d2693e6ef5963b22420db585e2e99a0b62a43fd287"
   PKG_URL="https://github.com/raspberrypi/firmware/archive/refs/tags/${PKG_VERSION}.tar.gz"
