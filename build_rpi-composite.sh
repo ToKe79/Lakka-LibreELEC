@@ -76,6 +76,7 @@ fi
 # list of targets/platforms in structure PROJECT|DEVICE|ARCH|make_rule
 
 targets="\
+	RPi|RPi3-Composite|aarch64|image \
 	RPi|RPi4-Composite|aarch64|image \
 	"
 
