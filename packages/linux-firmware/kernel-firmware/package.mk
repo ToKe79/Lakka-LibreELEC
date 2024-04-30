@@ -2,11 +2,11 @@
 # Copyright (C) 2016-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="kernel-firmware"
-PKG_VERSION="20221109"
-PKG_SHA256="d26b36549d680a2777c5fad641d170c49e7dacfca368509b2bb5a87e73aa5373"
+PKG_VERSION="20240312"
+PKG_SHA256="b2327a54ad1897c828008caf63af5ee15469ba723a5016be58f2b44f07bd4b94"
 PKG_LICENSE="other"
 PKG_SITE="https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/"
-PKG_URL="https://git.kernel.org/pub/scm/linux/kernel/git/firmware/linux-firmware.git/snapshot/${PKG_VERSION}.tar.gz"
+PKG_URL="https://cdn.kernel.org/pub/linux/kernel/firmware/linux-firmware-${PKG_VERSION}.tar.xz"
 PKG_NEED_UNPACK="${PROJECT_DIR}/${PROJECT}/packages/${PKG_NAME} ${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/packages/${PKG_NAME}"
 PKG_LONGDESC="kernel-firmware: kernel related firmware"
 PKG_TOOLCHAIN="manual"
@@ -78,6 +78,12 @@ makeinstall_target() {
   if listcontains "${GRAPHIC_DRIVERS}" "nouveau"; then
     cp -Lrv ${PKG_FW_SOURCE}/nvidia ${FW_TARGET_DIR}/
     rm -rv ${FW_TARGET_DIR}/nvidia/tegra*
+  fi
+
+  # Upstream doesn't name the file correctly so we need to symlink it
+  if [ -f "${FW_TARGET_DIR}/rtl_bt/rtl8723bs_config-OBDA8723.bin" ]; then
+    #cd "${FW_TARGET_DIR}/rtl_bt"
+    ln -s "rtl8723bs_config-OBDA8723.bin" "${FW_TARGET_DIR}/rtl_bt/rtl8723bs_config.bin"
   fi
 
   # On Lakka use iwlwifi firmware from this package instead of separate LibreELEC package
