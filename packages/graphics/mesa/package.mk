@@ -3,8 +3,8 @@
 # Copyright (C) 2018-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="mesa"
-PKG_VERSION="22.1.7"
-PKG_SHA256="da838eb2cf11d0e08d0e9944f6bd4d96987fdc59ea2856f8c70a31a82b355d89"
+PKG_VERSION="24.0.6"
+PKG_SHA256="8b7a92dbe6468c18f2383700135b5fe9de836cdf0cc8fd7dbae3c7110237d604"
 PKG_LICENSE="OSS"
 PKG_SITE="http://www.mesa3d.org/"
 PKG_URL="https://mesa.freedesktop.org/archive/mesa-${PKG_VERSION}.tar.xz"
@@ -14,10 +14,8 @@ PKG_TOOLCHAIN="meson"
 
 get_graphicdrivers
 
-PKG_MESON_OPTS_TARGET="-Ddri-drivers=${DRI_DRIVERS// /,} \
-                       -Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
+PKG_MESON_OPTS_TARGET="-Dgallium-drivers=${GALLIUM_DRIVERS// /,} \
                        -Dgallium-extra-hud=false \
-                       -Dgallium-xvmc=disabled \
                        -Dgallium-omx=disabled \
                        -Dgallium-nine=false \
                        -Dgallium-opencl=disabled \
@@ -31,6 +29,7 @@ PKG_MESON_OPTS_TARGET="-Ddri-drivers=${DRI_DRIVERS// /,} \
                        -Dlibunwind=disabled \
                        -Dlmsensors=disabled \
                        -Dbuild-tests=false \
+                       -Ddraw-use-llvm=false \
                        -Dselinux=false \
                        -Dosmesa=false"
 
@@ -49,7 +48,6 @@ else
 fi
 
 if [ "${LLVM_SUPPORT}" = "yes" ]; then
-  echo LLVM SUPPORT
   PKG_DEPENDS_TARGET+=" elfutils llvm"
   PKG_MESON_OPTS_TARGET+=" -Dllvm=enabled"
 else
@@ -83,10 +81,10 @@ else
 fi
 
 if [ "${VULKAN_SUPPORT}" = "yes" ]; then
-PKG_DEPENDS_TARGET+=" $VULKAN"
+PKG_DEPENDS_TARGET+=" ${VULKAN} vulkan-tools"
   if [ "${PROJECT}" = "Generic" -a "${ARCH}" = "x86_64" ]; then
     PKG_MESON_OPTS_TARGET="${PKG_MESON_OPTS_TARGET//-Dvulkan-drivers=/-Dvulkan-drivers=amd,intel}"
-  elif [ "${PROJECT}" = "RPi" -a "${DEVICE:0:4}" = "RPi4" ]; then
+  elif [ "${PROJECT}" = "RPi" ] && [ "${DEVICE:0:4}" = "RPi4" -o "${DEVICE:0:4}" = "RPi5" ]; then
     PKG_MESON_OPTS_TARGET="${PKG_MESON_OPTS_TARGET//-Dvulkan-drivers=/-Dvulkan-drivers=broadcom}"
   elif listcontains "${GRAPHIC_DRIVERS}" "freedreno"; then
     PKG_MESON_OPTS_TARGET="${PKG_MESON_OPTS_TARGET//-Dvulkan-drivers=/-Dvulkan-drivers=freedreno}"
