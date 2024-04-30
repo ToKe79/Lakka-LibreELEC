@@ -2,10 +2,8 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="rpi-eeprom"
-PKG_VERSION="6e79e995bbc75c5fdd5305bd7fe029758cfade2f"
-PKG_SHA256="6ea9d62c7b04736d2f480ed9b35cba23a15c1bd6ae883fe795b546889ca68be5"
-PKG_ARCH="arm"
-[ "${DISTRO}" = "Lakka" ] && PKG_ARCH+=" aarch64" || true
+PKG_VERSION="9a5a522ee8a17d4d445b4bb108c4da75bed829fe"
+PKG_SHA256="414cbdf196a93a72e67d761adf4b66404a11e68a2a003261bc90649b6c2a2c5a"
 PKG_LICENSE="BSD-3/custom"
 PKG_SITE="https://github.com/raspberrypi/rpi-eeprom"
 PKG_URL="https://github.com/raspberrypi/rpi-eeprom/archive/${PKG_VERSION}.tar.gz"
@@ -14,14 +12,20 @@ PKG_LONGDESC="rpi-eeprom: firmware, config and scripts to update RPi4 SPI bootlo
 PKG_TOOLCHAIN="manual"
 
 makeinstall_target() {
-  DESTDIR=${INSTALL}/$(get_kernel_overlay_dir)/lib/firmware/raspberrypi/bootloader
+  
+  if [ "${DEVICE:0:4}" = "RPi4" ]; then
+    _variant="2711"
+  else
+    _variant="2712"
+  fi
+
+  DESTDIR=${INSTALL}/$(get_kernel_overlay_dir)/lib/firmware/raspberrypi/bootloader-${_variant}
 
   mkdir -p ${DESTDIR}
-    _dirs="critical stable"
-    [ "${LIBREELEC_VERSION}" = "devel" ] && _dirs+=" beta"
+    _dirs="default latest"
 
     for _maindir in ${_dirs}; do
-      for _dir in ${PKG_BUILD}/firmware/${_maindir} ${PKG_BUILD}/firmware/{_maindir}-*; do
+      for _dir in ${PKG_BUILD}/firmware-${_variant}/${_maindir} ${PKG_BUILD}/firmware-${_variant}/${_maindir}-*; do
         [ -d "${_dir}" ] || continue
 
         _basedir="$(basename "${_dir}")"
@@ -33,14 +37,17 @@ makeinstall_target() {
           PKG_FW_FILE="$(ls -1 /${_dir}/pieeprom-* 2>/dev/null | tail -1)"
           [ -n "${PKG_FW_FILE}" ] && cp -PRv "${PKG_FW_FILE}" ${DESTDIR}/${_basedir}
 
-          # VIA USB3
-          PKG_FW_FILE="$(ls -1 ${_dir}/vl805-*.bin 2>/dev/null | tail -1)"
-          [ -n "${PKG_FW_FILE}" ] && cp -PRv "${PKG_FW_FILE}" ${DESTDIR}/${_basedir}
+          if [ "${DEVICE:0:4}" = "RPi4" ]; then
+            # VIA USB3
+            PKG_FW_FILE="$(ls -1 ${_dir}/vl805-*.bin 2>/dev/null | tail -1)"
+            [ -n "${PKG_FW_FILE}" ] && cp -PRv "${PKG_FW_FILE}" ${DESTDIR}/${_basedir}
+          fi
       done
     done
 
-    # also copy default and latest symlinks
-    cp -Prv ${PKG_BUILD}/firmware/{default,latest} ${DESTDIR}
+    # also create legacy naming symlinks
+    ln -s default ${DESTDIR}/critical
+    ln -s latest ${DESTDIR}/stable
 
   mkdir -p ${INSTALL}/usr/bin
     cp -PRv ${PKG_DIR}/source/rpi-eeprom-update ${INSTALL}/usr/bin
