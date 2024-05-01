@@ -12,5 +12,8 @@ makeinstall_target() {
   if [ "${LAKKA_NIGHTLY}" = yes ]; then
     sed -e 's|^MIRROR=.*$|MIRROR=https://nightly.builds.lakka.tv/.updater|' \
         -i ${INSTALL}/usr/bin/lakka-update
+  elif [ -n "${LAKKA_CANARY}" ]; then
+    sed -e 's|^MIRROR=.*$|MIRROR=${LAKKA_CANARY}|' \
+        -i ${INSTALL}/usr/bin/lakka-update
   fi
 }

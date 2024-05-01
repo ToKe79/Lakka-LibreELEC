@@ -92,8 +92,27 @@ declare -i good_jobs=0
 SKIP_ANNOUNCED=0
 
 date="$(date +%Y%m%d)"
+version="$(date +%y.%m.%d)"
 last_commit=$(git rev-parse HEAD)
 githash=${last_commit:0:7}
+builder="vudiq"
+download_prefix="http://nightly.builds.lakka.tv/members/${builder}/RPi-Composite"
+storage_path="/var/www/nightly.builds.lakka.tv/members/${builder}/RPi-Composite"
+
+[ ! -d ${storage_path} ] && {
+	echo "Storage '${storage_path}' does not exist!"
+	exit 1
+}
+
+touch ${storage_path}/.lakka 2>/dev/null
+ret=$?
+
+[ $ret -gt 0 ] && {
+	echo "Storage '${storage_path}' is not writable!"
+	exit 1
+}
+
+rm ${storage_path}/.lakka
 
 for target in ${targets}
 do
@@ -130,7 +149,7 @@ do
 	if [ "${DASHBOARD_MODE}" != "yes" ]
 	then
 		# show logs during build (non-dashboard build)
-		make ${out} OFFICIAL=no CUSTOM_IMAGE_NAME=${image_name} PROJECT=${project} DEVICE=${device} ARCH=${arch} MTIMMEDIATE=${qf} ${tc}
+		make ${out} BUILDER_NAME=${builder} LAKKA_CANARY=${download_prefix} CUSTOM_VERSION=${version} OFFICIAL=no CUSTOM_IMAGE_NAME=${image_name} PROJECT=${project} DEVICE=${device} ARCH=${arch} MTIMMEDIATE=${qf} ${tc}
 		ret_nondb=${?}
 		if [ ${ret_nondb} -gt 0 -a "${BAILOUT_FAILED}" != "no" ]
 		then
@@ -140,7 +159,7 @@ do
 		# remove the old dashboard, so we don't show old/stale dashboard
 		rm -f ${statusfile}
 		# start the build process in background
-		make ${out} OFFICIAL=no CUSTOM_IMAGE_NAME=${image_name} PROJECT=${project} DEVICE=${device} ARCH=${arch} MTIMMEDIATE=${qf} ${tc} &>/dev/null &
+		make ${out} BUILDER_NAME=${builder} LAKKA_CANARY=${download_prefix} CUSTOM_VERSION=${version} OFFICIAL=no CUSTOM_IMAGE_NAME=${image_name} PROJECT=${project} DEVICE=${device} ARCH=${arch} MTIMMEDIATE=${qf} ${tc} &>/dev/null &
 		# store the pid
 		pid=${!}
 		finished=0
@@ -280,31 +299,35 @@ do
 
 		# move release files to the folder
 		[ "${DASHBOARD_MODE}" = "yes" ] && echo -n "Moving release files (.img.gz, .tar) to subfolder..."
-		for file in Lakka-${target_name}-*{.img.gz,.tar}*
+		for file in ${image_name}*{.img.gz,.tar}*
 		do
-			[ -f "${file}" ] && mv ${v} ${file} ${target_name}/
+			[ -f "${file}" ] && mv ${v} ${file} ${storage_path}/${target_name}/
 		done
+		[ "${DASHBOARD_MODE}" = "yes" ] && echo "done!"
+		# update .index file
+		[ "${DASHBOARD_MODE}" = "yes" ] && echo -n "Updating .index..."
+		(
+			cd ${storage_path}/${target_name}
+			ls -t *.tar > .index
+		)
 		[ "${DASHBOARD_MODE}" = "yes" ] && echo "done!"
 		# remove files we do not use
 		[ "${DASHBOARD_MODE}" = "yes" ] && echo -n "Removing unused files (.ova,kernel,system)..."
-		rm -f ${v} Lakka-${target_name}-*.{ova,kernel,system}*
+		rm -f ${v} ${image_name}*.{ova,kernel,system}*
 		[ "${DASHBOARD_MODE}" = "yes" ] && echo "done!"
 		if [ "${target_name}" = "Switch.aarch64" ]
 		then
 			if [ -x $(which 7za 2>/dev/null) ]
 			then
 				[ "${DASHBOARD_MODE}" = "yes" ] && echo -n "Creating 7z archive for ${target_name}..."
-				cd ${target_name}
-				basename=$(basename $(ls Lakka-${target_name}-*.tar | head -n 1) .tar)
-				if [ -n "${basename}" ]
-				then
-					tar xf ${basename}.tar
-					cd ${basename}
-					7za a -r ../${basename}.7z * 2>&1 > /dev/null
+				(
+					cd ${target_name}
+					tar xf ${image_name}.tar
+					cd ${image_name}
+					7za a -r ../${image_name}.7z * 2>&1 > /dev/null
 					cd ..
-					rm -r ${basename}
-				fi
-				cd ..
+					rm -r ${image_name}
+				)
 				[ "${DASHBOARD_MODE}" = "yes" ] && echo "done!"
 			fi
 		fi
