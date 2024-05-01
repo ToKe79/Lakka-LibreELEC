@@ -15,4 +15,4 @@
     ADDON_PROJECT="ARMv8"
 
   # Enable composite
-    EXTRA_CMDLINE="video=Composite-1:720x480@60e"
+    EXTRA_CMDLINE="video=Composite-1:720x480@60e vc4.tv_norm=NTSC-J"
