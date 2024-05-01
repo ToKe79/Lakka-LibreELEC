@@ -294,44 +294,29 @@ do
 			good_jobs+=1
 		fi
 
-		cd target
-		mkdir -p ${target_name}
-
-		# move release files to the folder
-		[ "${DASHBOARD_MODE}" = "yes" ] && echo -n "Moving release files (.img.gz, .tar) to subfolder..."
-		for file in ${image_name}*{.img.gz,.tar}*
-		do
-			[ -f "${file}" ] && mv ${v} ${file} ${storage_path}/${target_name}/
-		done
-		[ "${DASHBOARD_MODE}" = "yes" ] && echo "done!"
-		# update .index file
-		[ "${DASHBOARD_MODE}" = "yes" ] && echo -n "Updating .index..."
 		(
-			cd ${storage_path}/${target_name}
-			ls -t *.tar > .index
+			cd target
+			mkdir -p ${storage_path}/${target_name}
+
+			# move release files to the folder
+			[ "${DASHBOARD_MODE}" = "yes" ] && echo -n "Moving release files (.img.gz, .tar) to subfolder..."
+			for file in ${image_name}*{.img.gz,.tar}*
+			do
+				[ -f "${file}" ] && mv ${v} ${file} ${storage_path}/${target_name}/
+			done
+			[ "${DASHBOARD_MODE}" = "yes" ] && echo "done!"
+			# update .index file
+			[ "${DASHBOARD_MODE}" = "yes" ] && echo -n "Updating .index..."
+			(
+				cd ${storage_path}/${target_name}
+				ls -t *.tar > .index
+			)
+			[ "${DASHBOARD_MODE}" = "yes" ] && echo "done!"
+			# remove files we do not use
+			[ "${DASHBOARD_MODE}" = "yes" ] && echo -n "Removing unused files (.ova,kernel,system)..."
+			rm -f ${v} ${image_name}*.{ova,kernel,system}*
+			[ "${DASHBOARD_MODE}" = "yes" ] && echo "done!"
 		)
-		[ "${DASHBOARD_MODE}" = "yes" ] && echo "done!"
-		# remove files we do not use
-		[ "${DASHBOARD_MODE}" = "yes" ] && echo -n "Removing unused files (.ova,kernel,system)..."
-		rm -f ${v} ${image_name}*.{ova,kernel,system}*
-		[ "${DASHBOARD_MODE}" = "yes" ] && echo "done!"
-		if [ "${target_name}" = "Switch.aarch64" ]
-		then
-			if [ -x $(which 7za 2>/dev/null) ]
-			then
-				[ "${DASHBOARD_MODE}" = "yes" ] && echo -n "Creating 7z archive for ${target_name}..."
-				(
-					cd ${target_name}
-					tar xf ${image_name}.tar
-					cd ${image_name}
-					7za a -r ../${image_name}.7z * 2>&1 > /dev/null
-					cd ..
-					rm -r ${image_name}
-				)
-				[ "${DASHBOARD_MODE}" = "yes" ] && echo "done!"
-			fi
-		fi
-		cd ..
 	else
 		# build OK, but no release files were created
 		failed_jobs+=1
