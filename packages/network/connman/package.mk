@@ -3,12 +3,12 @@
 # Copyright (C) 2019-present Team LibreELEC (https://libreelec.tv)
 
 PKG_NAME="connman"
-PKG_VERSION="f9566a2c1931e94b12fc1f5a492b653389fe199a" # 1.41 + 2023-01-02
-PKG_SHA256="5db92f766b766094b6c51b0405c7145cd6fc5a46802c9b75954db777df1e33f3"
+PKG_VERSION="1cde7a6598a639d1f1eb16f7929f32919172ef10"
+PKG_SHA256="680320f1c3de0c283b2df0d61807cd0ca88e012dc3ec906a0414b20a5866f19d"
 PKG_LICENSE="GPL"
 PKG_SITE="http://www.connman.net"
 PKG_URL="https://git.kernel.org/pub/scm/network/connman/connman.git/snapshot/connman-${PKG_VERSION}.tar.gz"
-PKG_DEPENDS_TARGET="toolchain glib readline dbus iptables"
+PKG_DEPENDS_TARGET="toolchain dbus glib iptables iwd readline"
 PKG_LONGDESC="A modular network connection manager."
 PKG_TOOLCHAIN="autotools"
 
@@ -40,9 +40,11 @@ PKG_CONFIGURE_OPTS_TARGET="--srcdir=.. \
                            --disable-stats \
                            --enable-client \
                            --enable-datafiles \
-                           --with-dbusconfdir=/etc \
+                           --with-dbusconfdir=/usr/share \
                            --with-systemdunitdir=/usr/lib/systemd/system \
-                           --disable-silent-rules"
+                           --disable-silent-rules \
+                           --disable-wifi \
+                           --enable-iwd"
 
 if [ "${WIREGUARD_SUPPORT}" = "yes" ]; then
   PKG_CONFIGURE_OPTS_TARGET+=" --enable-wireguard=builtin"
@@ -50,23 +52,13 @@ else
   PKG_CONFIGURE_OPTS_TARGET+=" --disable-wireguard"
 fi
 
-case "${WIRELESS_DAEMON}" in
-  wpa_supplicant)
-    PKG_DEPENDS_TARGET+=" wpa_supplicant"
-    PKG_CONFIGURE_OPTS_TARGET+=" WPASUPPLICANT=/usr/bin/wpa_supplicant \
-                                 --enable-wifi \
-                                 --disable-iwd"
-    ;;
-  iwd)
-    PKG_DEPENDS_TARGET+=" iwd"
-    PKG_CONFIGURE_OPTS_TARGET+=" --disable-wifi \
-                                 --enable-iwd"
-    ;;
-esac
-
 PKG_MAKE_OPTS_TARGET="storagedir=/storage/.cache/connman \
                       vpn_storagedir=/storage/.config/wireguard \
                       statedir=/run/connman"
+
+post_configure_target() {
+  libtool_remove_rpath libtool
+}
 
 post_makeinstall_target() {
   rm -rf ${INSTALL}/usr/lib/systemd
@@ -97,14 +89,10 @@ post_makeinstall_target() {
 
 post_install() {
   add_user system x 430 430 "service" "/var/run/connman" "/bin/sh"
-  add_group system 430 ${DISTRO}
+  add_group system 430
 
   enable_service connman.service
   if [ "${WIREGUARD_SUPPORT}" = "yes" ]; then
     enable_service connman-vpn.service
-  fi
-
-  if [ "${PROJECT}" = "L4T" -a "${DEVICE}" = "Switch" ]; then
-    echo chmod u+s ${BUILD}/image/system/usr/bin/connmanctl >> ${FAKEROOT_SCRIPT}
   fi
 }

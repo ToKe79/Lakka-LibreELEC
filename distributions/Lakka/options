@@ -95,9 +95,6 @@
   DISTRO_MIRROR="http://sources.libreelec.tv/mirror"
   DISTRO_SRC="http://sources.libreelec.tv/$LIBREELEC_VERSION"
 
-# wireless daemon to use (wpa_supplicant/iwd)
-  WIRELESS_DAEMON="wpa_supplicant"
-
 # build and install iSCSI support - iscsistart (yes / no)
   ISCSI_SUPPORT="yes"
 

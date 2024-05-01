@@ -49,6 +49,7 @@ PKG_CONFIGURE_OPTS_TARGET="py_cv_mod_gtk_=yes \
                            --disable-libevent \
                            --enable-compat-libdns_sd \
                            --disable-compat-howl \
+                           --disable-rpath \
                            --with-xml=expat \
                            --with-avahi-user=avahi \
                            --with-avahi-group=avahi \
@@ -56,6 +57,10 @@ PKG_CONFIGURE_OPTS_TARGET="py_cv_mod_gtk_=yes \
 
 pre_configure_target() {
   NOCONFIGURE=1 ./autogen.sh
+}
+
+post_configure_target() {
+  libtool_remove_rpath libtool
 }
 
 post_makeinstall_target() {
@@ -88,8 +93,8 @@ post_makeinstall_target() {
 }
 
 post_install() {
-  add_user avahi x 495 495 "avahi-daemon" "/var/run/avahi-daemon" "/bin/sh"
-  add_group avahi 495
+  add_user avahi x 70 70 "avahi-daemon" "/var/run/avahi-daemon" "/bin/sh"
+  add_group avahi 70
 
   enable_service avahi-defaults.service
   enable_service avahi-daemon.service
