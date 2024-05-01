@@ -312,9 +312,19 @@ makeinstall_target() {
     sed -i -e 's|^menu_driver =.*|menu_driver = "ozone"|' ${INSTALL}/etc/retroarch.cfg
   fi
 
-  # RPi*-Composite
-  if [ "${PROJECT}" = "RPi" -a "${DEVICE: -10}" = "-Composite" ]; then
-    echo 'audio_device = "default:CARD=Headphones"' >> ${INSTALL}/etc/retroarch.cfg
+  # RPi-Composite
+  if [ "${PROJECT}" = "RPi" -a  "${DEVICE: -10}" = "-Composite" ]; then
+    # Force 60 Hz
+    echo 'video_refresh_rate = "60.000000"' >> ${INSTALL}/etc/retroarch.cfg
+    # Set audio to headphone jack for Pi3/4, Pi 5 must use USB soundcard for analog audio out
+    if listcontains "${DEVICE:0:4}" = "(RPi3|RPi4)"; then
+      echo 'audio_device = "default:CARD=Headphones"' >> ${INSTALL}/etc/retroarch.cfg
+    fi
+    # Force this resolution for RPi5 to start in the right one
+    if [ "${DEVICE:0:4}" = "RPi5" ]; then
+      echo 'video_fullscreen_x = "721"' >> ${INSTALL}/etc/retroarch.cfg
+      echo 'video_fullscreen_y = "480"' >> ${INSTALL}/etc/retroarch.cfg
+    fi
   fi
 
   # iMX6
