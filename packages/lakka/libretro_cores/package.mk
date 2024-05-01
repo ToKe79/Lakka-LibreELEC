@@ -263,10 +263,5 @@ if [ -n "${CUSTOM_LIBRETRO_CORES}" ]; then
   LIBRETRO_CORES="${CUSTOM_LIBRETRO_CORES}"
 fi
 
-# temporary disabled due to build errors for all targets
-for core in citra pcsx2 same_cdi ; do
-  LIBRETRO_CORES="${LIBRETRO_CORES// ${core} /}"
-done
-
 # finally set package dependencies
 PKG_DEPENDS_TARGET="${LIBRETRO_CORES}"
