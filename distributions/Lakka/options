@@ -111,7 +111,7 @@
   SFTP_SERVER="yes"
 
 # build and install OpenVPN support (yes / no)
-  OPENVPN_SUPPORT="yes"
+  OPENVPN_SUPPORT="no"
 
 # build and install WireGuard support (yes / no)
   WIREGUARD_SUPPORT="yes"
