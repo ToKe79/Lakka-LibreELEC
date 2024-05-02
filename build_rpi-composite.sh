@@ -21,6 +21,9 @@
 # by default start in dashboard mode
 [ -z "${DASHBOARD_MODE}" ] && DASHBOARD_MODE="yes"
 
+# check if images should be stored in the storage_path or kept local
+[ -z "${BUILD_RELEASE}" ] && BUILD_RELEASE="no"
+
 # trap CTRL+C in dashboard mode, as the build job runs in background, we have to tell the user to wait
 [ "${DASHBOARD_MODE}" = "yes" ] && trap control_c_pressed INT
 
@@ -97,7 +100,15 @@ last_commit=$(git rev-parse HEAD)
 githash=${last_commit:0:7}
 builder="vudiq"
 download_prefix="http://nightly.builds.lakka.tv/members/${builder}/RPi-Composite"
-storage_path="/var/www/nightly.builds.lakka.tv/members/${builder}/RPi-Composite"
+
+if [ "${BUILD_RELEASE}" = "yes" ]
+then
+	storage_path="/var/www/nightly.builds.lakka.tv/members/${builder}/RPi-Composite"
+	echo "Images will be stored in ${storage_path} folder."
+else
+	storage_path="."
+	echo "Images will be stored in target folder."
+fi
 
 [ ! -d ${storage_path} ] && {
 	echo "Storage '${storage_path}' does not exist!"
