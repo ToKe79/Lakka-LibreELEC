@@ -51,7 +51,12 @@ if [ -e /storage/.please_resize_me ] ; then
 
     StartProgress spinner "Resizing partition...   " "parted -s -m $DISK resizepart 2 100% &>/dev/null"
     StartProgress spinner "Checking file system... " "e2fsck -f -p $PART &>/dev/null"
+    StartProgress spinner "Mounting storage...     " "mount $PART /storage &>/dev/null"
     StartProgress spinner "Resizing file system... " "resize2fs $PART &>/dev/null"
+    if [ -f /flash/firstboot.sh ]; then
+      StartProgress spinner "Setting up...           " "sh /flash/firstboot.sh &>/dev/null"
+    fi
+    StartProgress spinner "Unmounting storage...   " "umount /storage &>/dev/null"
     StartProgress countdown "Rebooting in 15s...     " 15 "NOW"
   fi
 fi
