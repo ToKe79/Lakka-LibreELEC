@@ -5,6 +5,11 @@ PKG_DEPENDS_TARGET="systemd lakka_update retroarch joyutils sixpair empty retror
 PKG_SECTION="virtual"
 PKG_LONGDESC="Root package used to build libretro suite"
 
+if [ "${LAKKA_LIGHT}" = "yes" ]; then
+  DISABLE_LIBRETRO_OPTIONAL="yes"
+  DISABLE_LIBRETRO_CORES="yes"
+fi
+
 if [ "${DISABLE_LIBRETRO_OPTIONAL}" != "yes" ]; then
   PKG_DEPENDS_TARGET+=" ${LIBRETRO_OPTIONAL}"
 fi

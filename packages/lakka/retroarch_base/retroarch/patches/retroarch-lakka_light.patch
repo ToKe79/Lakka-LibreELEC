@@ -1,0 +1,52 @@
+diff --git a/Makefile.common b/Makefile.common
+index e45ce88d74..68d985dcd2 100644
+--- a/Makefile.common
++++ b/Makefile.common
+@@ -1074,6 +1074,15 @@ ifeq ($(HAVE_LAKKA_DEVBUILD), 1)
+    DEFINES += -DHAVE_LAKKA_DEVBUILD
+ endif
+ 
++ifeq ($(HAVE_LAKKA_LIGHT), 1)
++   DEFINES += -DHAVE_LAKKA_LIGHT
++   ifeq ($(LAKKA_PLATFORM),)
++      $(error Building Lakka-Light, but no LAKKA_PLATFORM given - set via LAKKA_PLATFORM=DEVICE.ARCH)
++   else
++      DEFINES += -DLAKKA_PLATFORM="\"$(LAKKA_PLATFORM)\"" -DHAVE_NETWORKING -DHAVE_ONLINE_UPDATER -DHAVE_UPDATE_ASSETS -DHAVE_UPDATE_CORES
++   endif
++endif
++
+ ifeq ($(HAVE_MENU_COMMON), 1)
+    OBJ += menu/menu_setting.o \
+           menu/menu_driver.o \
+diff --git a/config.def.h b/config.def.h
+index 7537ea20aa..6043dc02af 100644
+--- a/config.def.h
++++ b/config.def.h
+@@ -1813,6 +1813,13 @@
+ #define DEFAULT_BUILDBOT_SERVER_URL ""
+ #endif
+ 
++#ifdef HAVE_LAKKA_LIGHT
++#ifdef DEFAULT_BUILDBOT_SERVER_URL
++#undef DEFAULT_BUILDBOT_SERVER_URL
++#endif
++#define DEFAULT_BUILDBOT_SERVER_URL "http://nightly.builds.lakka.tv/.buildbot/" LAKKA_PLATFORM "/latest/"
++#endif
++
+ #define DEFAULT_BUILDBOT_ASSETS_SERVER_URL "http://buildbot.libretro.com/assets/"
+ 
+ #define DEFAULT_DISCORD_APP_ID "475456035851599874"
+diff --git a/menu/menu_displaylist.c b/menu/menu_displaylist.c
+index 2fce83bbe1..193828f76e 100644
+--- a/menu/menu_displaylist.c
++++ b/menu/menu_displaylist.c
+@@ -14353,7 +14353,8 @@ bool menu_displaylist_ctl(enum menu_displaylist_ctl_state type,
+                      count++;
+                }
+ #endif
+-#elif defined(HAVE_NETWORKING)
++#endif /* HAVE_LAKKA */
++#if defined(HAVE_NETWORKING) && defined(HAVE_LAKKA_LIGHT)
+ #ifdef HAVE_UPDATE_CORES
+                if (settings->bools.menu_show_core_updater)
+                {

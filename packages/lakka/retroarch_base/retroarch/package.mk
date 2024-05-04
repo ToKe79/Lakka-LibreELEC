@@ -141,6 +141,10 @@ if [ "${LAKKA_DEVBUILD}" = yes ]; then
   PKG_MAKE_OPTS_TARGET+=" HAVE_LAKKA_DEVBUILD=1"
 fi
 
+if [ "${LAKKA_LIGHT}" = yes ]; then
+  PKG_MAKE_OPTS_TARGET+=" HAVE_LAKKA_LIGHT=1 LAKKA_PLATFORM=${DEVICE:-${PROJECT}}.${ARCH}"
+fi
+
 pre_configure_target() {
   TARGET_CONFIGURE_OPTS=""
   cd ${PKG_BUILD}
@@ -177,6 +181,18 @@ makeinstall_target() {
   # System overlay
   mkdir -p ${INSTALL}/usr/share/retroarch/system
     touch ${INSTALL}/usr/share/retroarch/system/.placeholder
+  mkdir -p ${INSTALL}/usr/lib/libretro/
+    touch ${INSTALL}/usr/lib/libretro/.placeholder
+  mkdir -p ${INSTALL}/usr/share/retroarch/shaders
+    touch ${INSTALL}/usr/share/retroarch/shaders/.placeholder
+  mkdir -p ${INSTALL}/usr/share/libretro-database
+    touch ${INSTALL}/usr/share/libretro-database/.placeholder
+  mkdir -p ${INSTALL}/usr/share/retroarch/assets
+    touch ${INSTALL}/usr/share/retroarch/assets/.placeholder
+  mkdir -p ${INSTALL}/etc/retroarch-joypad-autoconfig
+    touch ${INSTALL}/etc/retroarch-joypad-autoconfig/.placeholder
+  mkdir -p ${INSTALL}/usr/share/retroarch/overlays
+    touch ${INSTALL}/usr/share/retroarch/overlays/.placeholder
 
   # General configuration
   mkdir -p ${INSTALL}/etc
