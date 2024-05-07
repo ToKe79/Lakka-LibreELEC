@@ -320,6 +320,16 @@ makeinstall_target() {
   if [ "${PROJECT}" = "RPi" -a  "${DEVICE: -10}" = "-Composite" ]; then
     # Force 60 Hz
     echo 'video_refresh_rate = "60.000000"' >> ${INSTALL}/etc/retroarch.cfg
+    # show advanced settings
+    sed -i -e 's|^menu_show_advanced_settings =.*|menu_show_advanced_settings = "true"|' ${INSTALL}/etc/retroarch.cfg
+    # show save core overrides menu
+    echo 'quick_menu_show_save_core_overrides = "true"' >> ${INSTALL}/etc/retroarch.cfg
+    # hide menu sublabels - they are not legible anyway
+    echo 'menu_show_sublabels = "false"' >> ${INSTALL}/etc/retroarch.cfg
+    # do not show load animation, go directly to content
+    echo 'menu_show_load_content_animation = "false"' >> ${INSTALL}/etc/retroarch.cfg
+    # enable shaders
+    echo 'video_shader_enable = "true"' >> ${INSTALL}/etc/retroarch.cfg
     # Set audio to headphone jack for Pi3/4, Pi 5 must use USB soundcard for analog audio out
     if listcontains "${DEVICE:0:4}" = "(RPi3|RPi4)"; then
       echo 'audio_device = "default:CARD=Headphones"' >> ${INSTALL}/etc/retroarch.cfg
