@@ -37,7 +37,7 @@ ID=\$(connmanctl services | grep -e "\s${SSID}\s" | awk '{print \$(NF)}')
 echo "agent on"
 echo "connect \$ID"
 sleep 5
-echo "${SSID}"
+echo "${PSK}"
 ) | connmanctl
 END
 fi
