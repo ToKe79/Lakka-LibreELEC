@@ -318,6 +318,34 @@ makeinstall_target() {
 
   # RPi-Composite
   if [ "${PROJECT}" = "RPi" -a  "${DEVICE: -10}" = "-Composite" ]; then
+    # copy font
+    mkdir -p ${INSTALL}/usr/share/retroarch/assets
+      cp -rv ${PKG_DIR}/files-composite/assets/* ${INSTALL}/usr/share/retroarch/assets
+    # copy shaders
+    mkdir -p ${INSTALL}/usr/share/retroarch/shaders
+      cp -rv ${PKG_DIR}/files-composite/shaders/* ${INSTALL}/usr/share/retroarch/shaders
+      # keep only relevant shaders
+      if [ "${DEVICE:0:4}" = "RPi5" ]; then
+        rm -v ${INSTALL}/usr/share/retroarch/shaders/RPi-Composite/rpi3-4.glslp
+        rm -v ${INSTALL}/usr/share/retroarch/shaders/RPi-Composite/shaders/rpi3-4-composite-mmgb-vudiq.glsl
+      else
+        rm -v ${INSTALL}/usr/share/retroarch/shaders/RPi-Composite/rpi5.glslp
+        rm -v ${INSTALL}/usr/share/retroarch/shaders/RPi-Composite/shaders/rpi5-composite-mmgb-vudiq.glsl
+      fi
+    # copy core configs
+    mkdir -p ${INSTALL}/etc/retroarch/config
+      cp -rv ${PKG_DIR}/files-composite/config/* ${INSTALL}/etc/retroarch/config
+    # copy global shader preset
+    if [ "${DEVICE:0:4}" = "RPi5" ]; then
+      cp -v ${PKG_DIR}/files-composite/global-rpi5.glslp ${INSTALL}/etc/retroarch/config/global.glslp
+    else
+      cp -v ${PKG_DIR}/files-composite/global-rpi34.glslp ${INSTALL}/etc/retroarch/config/global.glslp
+    fi
+    # use specific font for composite
+    echo 'xmb_font = "/tmp/assets/xmb/xmb_pixel_mmgb.ttf"' >> ${INSTALL}/etc/retroarch.cfg
+    # offset the xmb title to be within visible screen area
+    echo 'menu_xmb_title_margin = "8"' >> ${INSTALL}/etc/retroarch.cfg
+    echo 'menu_xmb_title_margin_horizontal_offset = "3"' >> ${INSTALL}/etc/retroarch.cfg
     # Force 60 Hz
     echo 'video_refresh_rate = "60.000000"' >> ${INSTALL}/etc/retroarch.cfg
     # show advanced settings
