@@ -58,7 +58,10 @@ fi
 # If you want to put anything else to be executed on the first boot
 # (and only on the first boot), put it here.
 
-
+if [ -d /etc/retroarch/config ]; then
+  [ ! -d /storage/.config/retroarch/config ] && mkdir -p /storage/.config/retroarch/config
+  cp -r /etc/retroarch/config/* /storage/.config/retroarch/config
+fi
 
 # Do not put anything below here. But you can above here.
 
