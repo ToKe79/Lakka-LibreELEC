@@ -197,7 +197,7 @@ makeinstall_target() {
   echo 'rgui_show_start_screen = "false"' >> ${INSTALL}/etc/retroarch.cfg
   echo 'assets_directory = "/tmp/assets"' >> ${INSTALL}/etc/retroarch.cfg
   echo 'overlay_directory = "/tmp/overlays"' >> ${INSTALL}/etc/retroarch.cfg
-  echo 'cheat_database_path = "/tmp/cheats"' >> ${INSTALL}/etc/retroarch.cfg
+  echo 'cheat_database_path = "/tmp/database/cht"' >> ${INSTALL}/etc/retroarch.cfg
   echo 'cursor_directory = "/tmp/database/cursors"' >> ${INSTALL}/etc/retroarch.cfg
   echo 'log_dir = "/storage/logfiles"' >> ${INSTALL}/etc/retroarch.cfg
   echo 'recording_output_directory = "/storage/recordings"' >> ${INSTALL}/etc/retroarch.cfg
@@ -351,7 +351,10 @@ makeinstall_target() {
     # show advanced settings
     sed -i -e 's|^menu_show_advanced_settings =.*|menu_show_advanced_settings = "true"|' ${INSTALL}/etc/retroarch.cfg
     # show save core overrides menu
-    echo 'quick_menu_show_save_core_overrides = "true"' >> ${INSTALL}/etc/retroarch.cfg
+    sed -i -e 's|^quick_menu_show_save_core_overrides =.*|quick_menu_show_save_core_overrides = "true"|' >> ${INSTALL}/etc/retroarch.cfg
+    # show latency in quick menu
+    sed -i -e 's|^quick_menu_show_latency =.*|quick_menu_show_latency = "true"|' >> ${INSTALL}/etc/retroarch.cfg
+    echo 'menu_show_latency = "true"' >> ${INSTALL}/etc/retroarch.cfg
     # hide menu sublabels - they are not legible anyway
     echo 'menu_show_sublabels = "false"' >> ${INSTALL}/etc/retroarch.cfg
     # do not show load animation, go directly to content
@@ -360,6 +363,9 @@ makeinstall_target() {
     echo 'video_shader_enable = "true"' >> ${INSTALL}/etc/retroarch.cfg
     # turn on integer scaling
     echo 'video_scale_integer = "true"' >> ${INSTALL}/etc/retroarch.cfg
+    # rgui options
+    echo 'rgui_aspect_ratio_lock = "2"' >> ${INSTALL}/etc/retroarch.cfg
+    echo 'menu_linear_filter = "true"' >> ${INSTALL}/etc/retroarch.cfg
     # Set audio to headphone jack for Pi3/4, Pi 5 must use USB soundcard for analog audio out
     if listcontains "${DEVICE:0:4}" "(RPi3|RPi4)"; then
       echo 'audio_device = "default:CARD=Headphones"' >> ${INSTALL}/etc/retroarch.cfg
