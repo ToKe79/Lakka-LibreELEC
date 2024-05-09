@@ -1,0 +1,58 @@
+diff --git a/Makefile.common b/Makefile.common
+index 3277ff0a3e..27580732b7 100644
+--- a/Makefile.common
++++ b/Makefile.common
+@@ -1054,6 +1054,10 @@ ifeq ($(HAVE_BLUETOOTH), 1)
+    DEFINES += -DHAVE_BLUETOOTH
+ endif
+ 
++ifneq ($(HAVE_LAKKA_PROJECT),)
++   DEFINES += -DHAVE_LAKKA_PROJECT=\"${HAVE_LAKKA_PROJECT}\"
++endif
++
+ ifeq ($(HAVE_LAKKA), 1)
+    DEFINES += -DHAVE_LAKKA
+ endif
+diff --git a/file_path_special.h b/file_path_special.h
+index a80c0b657e..023f9c3e02 100644
+--- a/file_path_special.h
++++ b/file_path_special.h
+@@ -119,6 +119,10 @@ RETRO_BEGIN_DECLS
+ #define FILE_PATH_CORE_INFO_CACHE "core_info.cache"
+ #define FILE_PATH_CORE_INFO_CACHE_REFRESH "core_info.refresh"
+ 
++#ifdef HAVE_LAKKA_PROJECT
++#define LAKKA_PROJECT HAVE_LAKKA_PROJECT
++#endif
++
+ enum application_special_type
+ {
+    APPLICATION_SPECIAL_NONE = 0,
+diff --git a/menu/cbs/menu_cbs_ok.c b/menu/cbs/menu_cbs_ok.c
+index 80375b9f6f..b09ed94f12 100644
+--- a/menu/cbs/menu_cbs_ok.c
++++ b/menu/cbs/menu_cbs_ok.c
+@@ -5000,7 +5000,11 @@ static int generic_action_ok_network(const char *path,
+          /* TODO unhardcode this path */
+          fill_pathname_join_special(url_path,
+                FILE_PATH_LAKKA_URL,
++#ifdef LAKKA_PROJECT
++               LAKKA_PROJECT, sizeof(url_path));
++#else
+                lakka_get_project(), sizeof(url_path));
++#endif
+          fill_pathname_join_special(url_path, url_path,
+                FILE_PATH_INDEX_URL,
+                sizeof(url_path));
+@@ -5291,7 +5295,11 @@ static int action_ok_download_generic(const char *path,
+ #ifdef HAVE_LAKKA
+          /* TODO unhardcode this path*/
+          fill_pathname_join_special(s, FILE_PATH_LAKKA_URL,
++#ifdef LAKKA_PROJECT
++               LAKKA_PROJECT, sizeof(s));
++#else
+                lakka_get_project(), sizeof(s));
++#endif
+ #endif
+          break;
+       case MENU_ENUM_LABEL_CB_UPDATE_ASSETS:
