@@ -358,8 +358,10 @@ makeinstall_target() {
     echo 'menu_show_load_content_animation = "false"' >> ${INSTALL}/etc/retroarch.cfg
     # enable shaders
     echo 'video_shader_enable = "true"' >> ${INSTALL}/etc/retroarch.cfg
+    # turn on integer scaling
+    echo 'video_scale_integer = "true"' >> ${INSTALL}/etc/retroarch.cfg
     # Set audio to headphone jack for Pi3/4, Pi 5 must use USB soundcard for analog audio out
-    if listcontains "${DEVICE:0:4}" = "(RPi3|RPi4)"; then
+    if listcontains "${DEVICE:0:4}" "(RPi3|RPi4)"; then
       echo 'audio_device = "default:CARD=Headphones"' >> ${INSTALL}/etc/retroarch.cfg
     fi
     # Force this resolution for RPi5 to start in the right one
