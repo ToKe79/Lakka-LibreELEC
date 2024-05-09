@@ -351,9 +351,9 @@ makeinstall_target() {
     # show advanced settings
     sed -i -e 's|^menu_show_advanced_settings =.*|menu_show_advanced_settings = "true"|' ${INSTALL}/etc/retroarch.cfg
     # show save core overrides menu
-    sed -i -e 's|^quick_menu_show_save_core_overrides =.*|quick_menu_show_save_core_overrides = "true"|' >> ${INSTALL}/etc/retroarch.cfg
+    sed -i -e 's|^quick_menu_show_save_core_overrides =.*|quick_menu_show_save_core_overrides = "true"|' ${INSTALL}/etc/retroarch.cfg
     # show latency in quick menu
-    sed -i -e 's|^quick_menu_show_latency =.*|quick_menu_show_latency = "true"|' >> ${INSTALL}/etc/retroarch.cfg
+    sed -i -e 's|^quick_menu_show_latency =.*|quick_menu_show_latency = "true"|' ${INSTALL}/etc/retroarch.cfg
     echo 'menu_show_latency = "true"' >> ${INSTALL}/etc/retroarch.cfg
     # hide menu sublabels - they are not legible anyway
     echo 'menu_show_sublabels = "false"' >> ${INSTALL}/etc/retroarch.cfg
