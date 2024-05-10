@@ -376,6 +376,10 @@ makeinstall_target() {
       echo 'video_fullscreen_x = "721"' >> ${INSTALL}/etc/retroarch.cfg
       echo 'video_fullscreen_y = "480"' >> ${INSTALL}/etc/retroarch.cfg
     fi
+    # disable threaded video on RPi4 and RPi5a
+    if [ "${DEVICE:0:4}" = "RPi4" -o "${DEVICE:0:4}" = "RPi5" ]; then
+      sed -i -e 's|^video_threaded =.*|video_threaded = "false"|' ${INSTALL}/etc/retroarch.cfg
+    fi
   fi
 
   # iMX6
