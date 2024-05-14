@@ -351,8 +351,9 @@ makeinstall_target() {
     echo 'video_refresh_rate = "60.000000"' >> ${INSTALL}/etc/retroarch.cfg
     # show advanced settings
     sed -i -e 's|^menu_show_advanced_settings =.*|menu_show_advanced_settings = "true"|' ${INSTALL}/etc/retroarch.cfg
-    # show save core overrides menu
+    # show save core/game overrides menu
     sed -i -e 's|^quick_menu_show_save_core_overrides =.*|quick_menu_show_save_core_overrides = "true"|' ${INSTALL}/etc/retroarch.cfg
+    sed -i -e 's|^quick_menu_show_save_game_overrides =.*|quick_menu_show_save_game_overrides = "true"|' ${INSTALL}/etc/retroarch.cfg
     # show latency in quick menu
     sed -i -e 's|^quick_menu_show_latency =.*|quick_menu_show_latency = "true"|' ${INSTALL}/etc/retroarch.cfg
     echo 'menu_show_latency = "true"' >> ${INSTALL}/etc/retroarch.cfg
