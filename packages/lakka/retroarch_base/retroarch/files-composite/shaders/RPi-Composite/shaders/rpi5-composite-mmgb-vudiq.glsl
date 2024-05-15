@@ -95,9 +95,9 @@ void main()
 	if (InputSize.x > 565.0)
 		SourceSize = vec4(TextureSize, 1880.0 / TextureSize);
 	else if (InputSize.x > 450.0)
-		SourceSize = vec4(TextureSize, 800.0 / TextureSize);
+		SourceSize = vec4(TextureSize, 900.0 / TextureSize);
 	else if (InputSize.x > 300.0)
-		SourceSize = vec4(TextureSize, 600.0 / TextureSize);
+		SourceSize = vec4(TextureSize, 850.0 / TextureSize);
 	else if (InputSize.x > 250.0)
 		SourceSize = vec4(TextureSize, 295.0 / TextureSize);
 	else if (InputSize.x > 200.0)
