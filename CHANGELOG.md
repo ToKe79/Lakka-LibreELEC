@@ -1,3 +1,24 @@
+# RPi-Composite 24.05.15
+* Update libretro cores
+* Update custom shader for RPi5
+* Add comments with instructions for PAL/NTSC into `cmdline.txt` and `retroarch-overrides.txt`
+
+# RPi-Composite 24.05.14
+* Add japanse characters to custom font for on-screen keyboard
+
+# RPi-Composite 24.05.10
+* Initial release for Raspberry Pi (3/4/5) 240p/288p
+* Update Mesa to [24.0.6](https://docs.mesa3d.org/relnotes/24.0.6.html)
+* Update of various firmwares and toolchain components
+* Update libretro cores to match Lakka v5.0
+* Update RetroArch to (yet unreleased) 1.18.0
+* Add separate updater URL for RPi-Composite
+* Add support for set-up script (`firstboot.sh`) to set-up Wi-Fi, add new / override default RetroArch config settings
+* Add aspect correct Lakka logo for splash screen
+* Add core configurations for some cores (mainly to correct aspect ratio)
+* Add custom shader
+* Add custom font for RetroArch xmb menu driver
+
 # v4.4
 * Add new libretro core: `dirksimple`
 * Add new libretro core: `jaxe`
