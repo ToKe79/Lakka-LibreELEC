@@ -1,0 +1,141 @@
+#!/bin/sh
+
+#######################################################
+# We make sure that retroarch.cfg contains these      #
+# settings for the current mode:                      #
+#                                                     #
+# RPi3/4 - PAL  - video_refresh_rate = "50.08"        #
+#                 video_autoswitch_refresh_rate = "3" #
+#                                                     #
+# RPi3/4 - NTSC - video_refresh_rate = "60.00"        #
+#                 video_autoswitch_refresh_rate = "0" #
+#                                                     #
+# RPi5   - PAL  - video_fullscreen_y = "576"          #
+#                                                     #
+# RPi5   - NTSC - video_fullscreen_y = "480"          #
+#                                                     #
+#######################################################
+
+# Which device we use?
+source /etc/os-release
+PROJECT="${LIBREELEC_PROJECT}"
+DEVICE="${LIBREELEC_DEVICE:0:4}"
+
+# Make sure we are RPi, otherwise exit
+[ ! "${PROJECT}" = "RPi" ] && exit 0
+
+# Make sure we are Composite build, otherwise exit
+[ ! "${DEVICE: -10}" = "-Composite" ] && exit 0
+
+# Get the content of the cmdline
+CMDLINE="$(cat /proc/cmdline)"
+
+# Where are configs
+CFG_PATH=/storage/.config/retroarch
+RA_CFG=${CFG_PATH}/retroarch.cfg
+RA_DEF=/etc/retroarch.cfg
+
+# RPi3/4: The refresh rates are not including closing quote,
+# as we want to match also e.g. 50.0808 - so anything, that
+# starts with e.g. 50.08 (or 60.0 for NTSC) is acceptable
+# and we do not need to replace the line
+rpi34_pal_vrr="video_refresh_rate = \"50.08"
+rpi34_ntsc_vrr="video_refresh_rate = \"60.0"
+
+# RPi3/4: For PAL we need tu turn off autoswitch of the refresh
+# rate, can stay enabled for NTSC
+rpi34_pal_varr="video_autoswitch_refresh_rate = \"3\""
+rpi34_ntsc_varr="video_autoswitch_refresh_rate = \"0\""
+
+# RPi5: We must adjust the vertical (y) resolution based on the mode
+rpi5_pal_vfy="video_fullscreen_y = \"576\""
+rpi5_ntsc_vfy="video_fullscreen_y = \"480\""
+
+# cmdline contains the mode we are booting in, same argument is used
+# for RPi3/4, but different argument is used for RPi5
+case "${DEVICE}" in
+  RPi3|RPi4)
+    PAL="720x576@50e"
+    NTSC="720x480@60e"
+    ;;
+  RPi5)
+    PAL="720x576,tv_mode_PAL"
+    NTSC="720x480,tv_mode=NTSC"
+    ;;
+  *)
+    PAL="UNSUPPORTED_DEVICE"
+    NTSC="UNSUPPORTED_DEVICE"
+esac
+
+# Exit if have unsupported device
+[ "${PAL}" = "UNSUPPORTED_DEVICE" ] && exit 0
+
+# Check if config folder exists, if not, create it
+[ ! -d ${CFG_PATH} ] && mkdir -p ${CFG_PATH}
+
+# Check if config file is already present, if not, copy default one
+[ ! -f ${RA_CFG} ] && cp ${RA_DEF} ${RA_CFG}
+
+# Which mode are we booting?
+case "${CMDLINE}" in
+  *${PAL}*)
+    # We are booting in PAL mode
+    case ${DEVICE} in
+      RPi3|RPi4)
+        # video_refresh_rate
+        if ! grep "^$rpi34_pal_vrr" ${RA_CFG} 2>&1 > /dev/null ; then
+          # remove existing line
+          sed -i "/video_refresh_rate =/d" ${RA_CFG} 2>&1 > /dev/null
+          # add new line
+          echo "${rpi34_pal_vrr}\"" >> ${RA_CFG}
+        fi
+        # video_autoswitch_refresh_rate
+        if ! grep "^$rpi34_pal_varr" ${RA_CFG} 2>&1 > /dev/null ; then
+          # remove existing line
+          sed -i "/video_autoswitch_refresh_rate =/d" ${RA_CFG}
+          # add new line
+          echo "${rpi34_pal_varr}\"" >> ${RA_CFG}
+        fi
+        ;;
+      RPi5)
+        # video_fullscreen_y
+	if ! grep "^$rpi5_pal_vfy" ${RA_CFG} 2>&1 > /dev/null ; then
+          # remove existing line
+          sed -i "/video_fullscreen_y =/d" ${RA_CFG} 2>&1 > /dev/null
+          # add new line
+	  echo "${rpi5_pal_vfy}" >> ${RA_CFG}
+	fi
+        ;;
+    esac
+    ;;
+  *${NTSC}*)
+    # We are booting in NTSC mode
+    case ${DEVICE} in
+      RPi3|RPi4)
+        # video_refresh_rate
+        if ! grep "^$rpi34_ntsc_vrr" ${RA_CFG} 2>&1 > /dev/null ; then
+          # remove existing line
+          sed -i "/video_refresh_rate =/d" ${RA_CFG} 2>&1 > /dev/null
+          # add new line
+          echo "${rpi34_ntsc_vrr}\"" >> ${RA_CFG}
+        fi
+        # video_autoswitch_refresh_rate
+        if ! grep "^$rpi34_ntsc_varr" ${RA_CFG} 2>&1 > /dev/null ; then
+          # remove existing line
+          sed -i "/video_autoswitch_refresh_rate =/d" ${RA_CFG}
+          # add new line
+          echo "${rpi34_ntsc_varr}\"" >> ${RA_CFG}
+        fi
+        ;;
+      RPi5)
+        # video_fullscreen_y
+	if ! grep "^$rpi5_ntsc_vfy" ${RA_CFG} 2>&1 > /dev/null ; then
+          # remove existing line
+          sed -i "/video_fullscreen_y =/d" ${RA_CFG} 2>&1 > /dev/null
+          # add new line
+	  echo "${rpi5_ntsc_vfy}" >> ${RA_CFG}
+	fi
+        ;;
+    esac
+    ;;
+esac

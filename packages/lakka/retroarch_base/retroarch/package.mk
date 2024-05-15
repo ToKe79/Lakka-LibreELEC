@@ -449,4 +449,9 @@ post_install() {
   enable_service tmp-system.mount
   enable_service retroarch-autostart.service
   enable_service retroarch.service
+
+  # enable only for composite build
+  if [ "${PROJECT}" = "RPi" -a "${DEVICE: -10}" = "-Composite" ]; then
+    enable_service composite-ra-config.service
+  fi
 }

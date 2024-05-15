@@ -1,0 +1,13 @@
+[Unit]
+Description=Auto update of retroarch.cfg based on boot mode (PAL/NTSC)
+Before=retroarch.service
+After=graphical.target
+
+[Service]
+Type=oneshot
+Environment=HOME=/storage
+ExecStart=-/bin/sh -c ". /etc/profile; /usr/lib/retroarch/composite-ra-config"
+RemainAfterExit=yes
+
+[Install]
+WantedBy=retroarch.service
