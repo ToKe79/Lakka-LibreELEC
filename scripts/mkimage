@@ -220,6 +220,28 @@ elif [ "${BOOTLOADER}" = "bcm2835-bootloader" ]; then
 boot=UUID=${UUID_SYSTEM} disk=UUID=${UUID_STORAGE} quiet ${EXTRA_CMDLINE}
 EOF
 
+  if [ "${PROJECT}" = "RPi" -a "${DEVICE: -10}" = "-Composite" ]; then
+    if [ "${DEVICE:0:4}" = "RPi3" -o "${DEVICE:0:4}" = "RPi4" ]; then
+      cat << EOF >> "${LE_TMP}/cmdline.txt"
+
+# NTSC:
+# video=Composite-1:720x480@60e vc4.tv_norm=NTSC-J
+#
+# PAL:
+# video=Composite-1:720x576@50e
+EOF
+    elif [ "${DEVICE:0:4}" = "RPi5" ]; then
+      cat << EOF >> "${LE_TMP}/cmdline.txt"
+
+# NTSC:
+# video=Composite-1:720x480,tv_mode=NTSC-J drm_rp1_vec.cmode=27000:721/16/64/58,480/6/6/34
+#
+# PAL:
+# video=Composite-1:720x576,tv_mode=PAL drm_rp1_vec.cmode=27000,721/12/64/68,576/4/6/38
+EOF
+    fi
+  fi
+
   mcopy "${LE_TMP}/cmdline.txt" ::
 
   # copy files
@@ -308,14 +330,45 @@ if [ -f "${DISTRO_DIR}/${DISTRO}/config/firstboot.sh" ]; then
 # them, escape them and hope for best.
 #SSID=
 #PSK=
+
 EOF
   mcopy "${LE_TMP}/wifi-config.txt" ::/wifi-config.txt >"${SAVE_ERROR}" 2>&1 || show_error
 
   cat << EOF > "${LE_TMP}/retroarch-overrides.txt"
-# Add overrides for RetroArch default configuration in following form:
+# Add overrides for RetroArch default configuration in
+# following form:
+#
 # key_name = "value"
 # other_key = 42
+#
+# These will be then added to / replace existing ones in
+# default retroarch.cfg
+#
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!  Overrides / settings from this file are used  !!!
+# !!! only during the very first boot after flashing !!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 EOF
+
+  if [ "${PROJECT}" = "RPi" -a "${DEVICE: -10}" = "-Composite" ]; then
+    cat << EOF >> "${LE_TMP}/retroarch-overrides.txt"
+#
+# Overrides for RPiX-Composite build:
+#
+# PAL Users: uncomment following line(s):
+EOF
+    if [ "${DEVICE:0:4}" = "RPi3" -o "${DEVICE:0:4}" = "RPi4" ]; then
+      cat << EOF >> "${LE_TMP}/retroarch-overrides.txt"
+#video_autoswitch_refresh_rate = "3"
+#video_refresh_rate = "50.08"
+EOF
+    elif [ "${DEVICE:0:4}" = "RPi5" ]; then
+      cat << EOF >> "${LE_TMP}/retroarch-overrides.txt"
+#video_fullscreen_y = "576"
+EOF
+    fi
+  fi
+
   mcopy "${LE_TMP}/retroarch-overrides.txt" ::/retroarch-overrides.txt >"${SAVE_ERROR}" 2>&1 || show_error
 fi
 
