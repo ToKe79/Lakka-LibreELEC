@@ -1,3 +1,6 @@
+# RPi-Composite xx.xx.xx
+* Use upstream repository for picodrive (fix sound issue with some games)
+
 # RPi-Composite 24.05.15
 * Update libretro cores
 * Update custom shader for RPi5
