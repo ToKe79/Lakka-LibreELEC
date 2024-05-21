@@ -1,5 +1,6 @@
 # RPi-Composite xx.xx.xx
-* Use upstream repository for picodrive (fix sound issue with some games)
+* Picodrive: use upstream repository (fixes sound issue with some games)
+* RetroArch: save to default config file patch
 
 # RPi-Composite 24.05.15
 * Update libretro cores
