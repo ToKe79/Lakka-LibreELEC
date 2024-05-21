@@ -43,6 +43,8 @@ package=${2}
 declare -i failed=0
 failed_targets=""
 skipped_targets=""
+builder="vudiq"
+download_prefix="http://nightly.builds.lakka.tv/members/${builder}/RPi-Composite"
 
 for T in ${targets} ; do
 	IFS='|' read -r -a build <<< ${T}
@@ -56,6 +58,8 @@ for T in ${targets} ; do
 	export PROJECT=${project}
 	export DEVICE=${device}
 	export ARCH=${arch}
+	export BUILDER_NAME=${builder}
+	export LAKKA_CANARY=${download_prefix}
 
 	opt_file="distributions/${distro}/options"
 	ver_file="distributions/${distro}/version"
