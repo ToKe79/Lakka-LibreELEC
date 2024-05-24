@@ -160,7 +160,7 @@ do
 	if [ "${DASHBOARD_MODE}" != "yes" ]
 	then
 		# show logs during build (non-dashboard build)
-		make ${out} BUILDER_NAME=${builder} LAKKA_CANARY=${download_prefix} CUSTOM_VERSION=${version} OFFICIAL=no CUSTOM_IMAGE_NAME=${image_name} PROJECT=${project} DEVICE=${device} ARCH=${arch} MTIMMEDIATE=${qf} ${tc}
+		make ${out} BUILDER_NAME=${builder} LAKKA_UPDATE_SERVER_URL=${download_prefix} CUSTOM_VERSION=${version} OFFICIAL=no CUSTOM_IMAGE_NAME=${image_name} PROJECT=${project} DEVICE=${device} ARCH=${arch} MTIMMEDIATE=${qf} ${tc}
 		ret_nondb=${?}
 		if [ ${ret_nondb} -gt 0 -a "${BAILOUT_FAILED}" != "no" ]
 		then
@@ -170,7 +170,7 @@ do
 		# remove the old dashboard, so we don't show old/stale dashboard
 		rm -f ${statusfile}
 		# start the build process in background
-		make ${out} BUILDER_NAME=${builder} LAKKA_CANARY=${download_prefix} CUSTOM_VERSION=${version} OFFICIAL=no CUSTOM_IMAGE_NAME=${image_name} PROJECT=${project} DEVICE=${device} ARCH=${arch} MTIMMEDIATE=${qf} ${tc} &>/dev/null &
+		make ${out} BUILDER_NAME=${builder} LAKKA_UPDATE_SERVER_URL=${download_prefix} CUSTOM_VERSION=${version} OFFICIAL=no CUSTOM_IMAGE_NAME=${image_name} PROJECT=${project} DEVICE=${device} ARCH=${arch} MTIMMEDIATE=${qf} ${tc} &>/dev/null &
 		# store the pid
 		pid=${!}
 		finished=0

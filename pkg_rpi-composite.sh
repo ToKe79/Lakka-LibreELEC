@@ -59,7 +59,7 @@ for T in ${targets} ; do
 	export DEVICE=${device}
 	export ARCH=${arch}
 	export BUILDER_NAME=${builder}
-	export LAKKA_CANARY=${download_prefix}
+	export LAKKA_UPDATE_SERVER_URL=${download_prefix}
 
 	opt_file="distributions/${distro}/options"
 	ver_file="distributions/${distro}/version"
