@@ -389,6 +389,35 @@ EOF
   mcopy "${LE_TMP}/retroarch-overrides.txt" ::/retroarch-overrides.txt >"${SAVE_ERROR}" 2>&1 || show_error
 fi
 
+# add partition setup config for Lakka
+if [ "${DISTRO}" = "Lakka" ]; then
+  cat << EOF > "${LE_TMP}/partition-setup.txt"
+# Select if you want EXFAT partition to be created during first
+# boot of Lakka. Also you can change the default size for the EXT4
+# partition, which is used for saving of system and RetroArch
+# configuration files. If you select to create EXFAT partition,
+# all your RetroArch savefiles, savestates, playlists, thumbnails,
+# screenshots, downloads, logfiles, remappings and recordings will
+# be saved on the EXFAT partition in folder '01_RetroArch'. The
+# contents of the EXFAT partition is accessible from RetroArch under
+# /storage/roms/EXFAT.
+#
+# Default size for the EXT4 partion is ${EXT4_DEFAULT_SIZE} MiB. You can change this
+# value below (key EXT4_SIZE_IN_MB). Currently there are no checks
+# whether the size fits your storage device, so be careful when
+# changing the size depending on the size of your storage device.
+# Value must be between 256 and 4096 (MiB) and multiple of 128.
+# If this criteria is not met, the default size ${EXT4_DEFAULT_SIZE} MiB is used.
+#
+# All remaining space of your storage device (USB thumb drive, SD
+# card, ...) will be used for the EXFAT partition
+#
+#EXFAT=yes
+#EXT4_SIZE_IN_MB=${EXT4_DEFAULT_SIZE}
+EOF
+  mcopy "${LE_TMP}/partition-setup.txt" ::/partition-setup.txt >"${SAVE_ERROR}" 2>&1 || show_error
+fi
+
 # run fsck
 echo "image: checking filesystem on part1..."
 sync

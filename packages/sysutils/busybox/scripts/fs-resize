@@ -38,9 +38,11 @@ if [ -e /storage/.please_resize_me ] ; then
   case $PART in
     "/dev/mmcblk"*|"/dev/nvme"*)
       DISK=$(echo $PART | sed s/p2$//g)
+      EXFAT_PART=${DISK}p3
       ;;
     *)
       DISK=$(echo $PART | sed s/2$//g)
+      EXFAT_PART=${DISK}3
       ;;
   esac
 
@@ -52,6 +54,47 @@ if [ -e /storage/.please_resize_me ] ; then
 
   echo "DISK: $DISK  PART: $PART  LABEL: $LABEL  UUID: $UUID" >>$LOG
 
+  SCHEME=$(blkid -s PTTYPE -o value $DISK)
+  if [ "$SCHEME" = "gpt" ]; then
+    EXFAT_PART_TYPE="'EXFAT'"
+  else
+    EXFAT_PART_TYPE="primary"
+  fi
+
+  # default values for exfat partition
+  EXFAT=no
+  EXT4_SIZE_IN_MB=@EXT4_DEFAULT_SIZE@
+  EXFAT_TMP_MOUNT=/tmp/exfat
+  if [ -f /flash/partition-setup.txt ]; then
+    while IFS= read -r line ; do
+      # skip empty lines
+      [ -z "${line}" ] && continue
+      # skip comments
+      [ "${line:0:1}" = "#" ] && continue
+      key=$(echo ${line} | cut -d'=' -f 1 2>/dev/null)
+      value=$(echo ${line} | cut -d'=' -f 2 2>/dev/null)
+      # skip if any of key or value is blank
+      [ -z "$key" -o -z "$value" ] && continue
+      case $key in
+        EXFAT)
+          if [ "$value" = "yes" ]; then
+            EXFAT=yes
+            mkdir $EXFAT_TMP_MOUNT
+          fi
+          ;;
+        EXT4_SIZE_IN_MB)
+          # accept only digits
+          if [[ $value =~ '^[0-9]+$' ]]; then
+            # check min/max and multiple of 128
+            if [ $value -ge 256 -a $value -le 4096 -a $(( value % 128)) -eq 0 ]; then
+              EXT4_SIZE_IN_MB=$value
+            fi
+          fi
+          ;;
+      esac
+    done < /flash/partition-setup.txt
+  fi
+
   # just in case
   if [ ! -z "$DISK" -a ! -z "$PART" -a ! -z "$UUID" ] ; then
     umount $PART
@@ -61,13 +104,33 @@ if [ -e /storage/.please_resize_me ] ; then
     echo "Please do not reboot or turn off your @DISTRONAME@ device!"
     echo ""
 
-    StartProgressLog spinner "Resizing partition...   " "parted -s -f -m $DISK resizepart 2 100% >>$LOG 2>&1"
-    StartProgressLog spinner "Creating file system... " "mke2fs -F -q -t ext4 -m 0 -L \"$LABEL\" -U \"$UUID\" $PART >>$LOG 2>&1"
-    StartProgressLog spinner "Checking file system... " "e2fsck -f -p $PART >>$LOG 2>&1"
-    if [ -f /flash/firstboot.sh ]; then
-      StartProgressLog spinner "Mounting storage...     " "mount $PART /storage >>$LOG 2>&1"
-      StartProgressLog spinner "Setting up...           " "sh /flash/firstboot.sh >>$LOG 2>&1"
-      StartProgressLog spinner "Unmounting storage...   " "umount /storage >>$LOG 2>&1"
+    if [ "$EXFAT" = "yes" ]; then
+      StartProgressLog spinner "Getting disk information...   " "parted -s -f -m $DISK print all >>$LOG 2>&1"
+      StartProgressLog spinner "Resizing ext4 partition...    " "parted -s -m $DISK resizepart 2 ${EXFAT_SIZE_IN_MB}MiB >>$LOG 2>&1"
+      StartProgressLog spinner "Checking file system...       " "e2fsck -f -p $PART >>$LOG 2>&1"
+      StartProgressLog spinner "Creating file system...       " "mke2fs -F -q -t ext4 -m 0 -L \"$LABEL\" -U \"$UUID\" $PART >>$LOG 2>&1"
+      StartProgressLog spinner "Updating disk information...  " "parted -s -f -m $DISK print all >>$LOG 2>&1"
+      EXFAT_START="$(( $(parted -s -f -m $DISK print 2>/dev/null | grep -m1 ^2: | cut -d: -f3 | sed -e s/MB//) + 17 ))"
+      StartProgressLog spinner "Creating exFAT partition...   " "parted -s -f -m $DISK mkpart $EXFAT_PART_TYPE ntfs ${EXFAT_START}MB 100% >>$LOG 2>&1"
+      StartProgressLog spinner "Probing partitions...         " "partprobe >>$LOG 2>&1"
+      StartProgressLog spinner "Formatting exFAT partition... " "mkfs.exfat -f -L EXFAT $EXFAT_PART >>$LOG 2>&1"
+      StartProgressLog spinner "Mounting exFAT...             " "mount $EXFAT_PART $EXFAT_TMP_MOUNT >>$LOG 2>&1"
+      StartProgressLog spinner "Mounting storage...           " "mount $PART /storage >>$LOG 2>&1"
+      StartProgressLog spinner "Setting up exFAT partition... " "sh /usr/bin/lakka-populate-exfat.sh $EXFAT_TMP_MOUNT >>$LOG 2>&1"
+      if [ -f /flash/firstboot.sh ]; then
+        StartProgressLog spinner "Setting up (firstboot.sh)...  " "sh /flash/firstboot.sh >>$LOG 2>&1"
+      fi
+      StartProgressLog spinner "Unmounting storage...         " "umount /storage >>$LOG 2>&1"
+      StartProgressLog spinner "Unmounting exFAT...           " "umount $EXFAT_TMP_MOUNT >>$LOG 2>&1"
+    else
+      StartProgressLog spinner "Resizing partition...   " "parted -s -f -m $DISK resizepart 2 100% >>$LOG 2>&1"
+      StartProgressLog spinner "Creating file system... " "mke2fs -F -q -t ext4 -m 0 -L \"$LABEL\" -U \"$UUID\" $PART >>$LOG 2>&1"
+      StartProgressLog spinner "Checking file system... " "e2fsck -f -p $PART >>$LOG 2>&1"
+      if [ -f /flash/firstboot.sh ]; then
+        StartProgressLog spinner "Mounting storage...     " "mount $PART /storage >>$LOG 2>&1"
+        StartProgressLog spinner "Setting up...           " "sh /flash/firstboot.sh >>$LOG 2>&1"
+        StartProgressLog spinner "Unmounting storage...   " "umount /storage >>$LOG 2>&1"
+      fi
     fi
     StartProgress countdown "Rebooting in 15s...     " 15 "NOW"
   else

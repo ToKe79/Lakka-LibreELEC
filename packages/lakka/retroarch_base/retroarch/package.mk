@@ -176,7 +176,7 @@ makeinstall_target() {
   mkdir -p ${INSTALL}/etc
   echo 'libretro_directory = "/tmp/cores"' >> ${INSTALL}/etc/retroarch.cfg
   echo 'libretro_info_path = "/tmp/cores"' >> ${INSTALL}/etc/retroarch.cfg
-  echo 'rgui_browser_directory = "/storage/roms"' >> ${INSTALL}/etc/retroarch.cfg
+  echo 'rgui_browser_directory = "~/roms"' >> ${INSTALL}/etc/retroarch.cfg
   echo 'content_database_path = "/tmp/database/rdb"' >> ${INSTALL}/etc/retroarch.cfg
   echo 'playlist_directory = "/storage/playlists"' >> ${INSTALL}/etc/retroarch.cfg
   echo 'savefile_directory = "/storage/savefiles"' >> ${INSTALL}/etc/retroarch.cfg

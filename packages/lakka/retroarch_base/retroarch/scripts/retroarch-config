@@ -1,6 +1,59 @@
 #!/bin/sh
 
+copy_from_exfat() {
+  # copy user added files from EXFAT partition to the system locations
+  EXFAT_MOUNT=$(mount | grep /EXFAT 2>/dev/null | cut -d' ' -f 3 2>/dev/null)
+  LOG=${EXFAT_MOUNT}/03_Transfer_done/transfer_log_$(date +%Y%m%d_%H%M%S).txt
+
+  # end early if there is no EXFAT mount ...
+  [ -z "${EXFAT_MOUNT}" ] && return
+
+  # ... or the mount is not in the expected location ...
+  [ "${EXFAT_MOUNT}" = "/storage/roms/EXFAT" ] && return
+
+  # ... or the partition does not have expected subfolder
+  if [ ! -d ${EXFAT_MOUNT}/02_Transfer ]; then
+    # but create folders first
+    for subfolder in assets cores database joypads overlays shaders system ; do
+      mkdir -p ${EXFAT_MOUNT}/02_Transfer/${subfolder}
+    done
+    return
+  fi
+
+  # check for files in individual subfolders
+  for subfolder in assets cores database joypads overlays shaders system ; do
+
+    # skip if subfolder does not exist, but create empty one first
+    if [ ! -d ${EXFAT_MOUNT}/02_Transfer/${subfolder} ]; then
+      mkdir -p ${EXFAT_MOUNT}/02_Transfer/${subfolder}
+      continue
+    fi
+
+    for item in ${EXFAT_MOUNT}/02_Transfer/${subfolder}/* ; do
+
+      # skip, if there are no files in the subfolder
+      [ ! -e ${item} ] && continue
+
+      [ ! -d ${EXFAT_MOUNT}/03_Transfer_done/${subfolder} ] && mkdir -p ${EXFAT_MOUNT}/03_Transfer_done/${subfolder}
+
+      echo "Copying ${item} to /tmp/${subfolder}:" >>${LOG}
+      cp -vrf item /tmp/${subfolder} >>${LOG} 2>&1
+
+      echo "Copying ${item} to ${EXFAT_MOUNT}/03_Transfer_done/${subfolder}:" >>${LOG}
+      cp -vrf ${item} ${EXFAT_MOUNT}/03_Transfer_done/${subfolder} >>${LOG} 2>&1
+
+      echo "Removing ${item}:" >>${LOG}
+      rm -vrf ${item} >>${LOG} 2>&1
+
+    done
+
+  done
+}
+
 for i in 5 4 3 2 1 0; do [ -e /dev/snd/pcmC${i}D0p ] && export ALSA_CARD=$i; done
 
 echo "ALSA_CARD=\"$ALSA_CARD\"" > /run/libreelec/retroarch.conf
 echo "LD_LIBRARY_PATH=\"/usr/lib:/tmp/cores\"" >> /run/libreelec/retroarch.conf
+
+copy_from_exfat
+
