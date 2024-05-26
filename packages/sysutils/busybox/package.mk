@@ -134,6 +134,7 @@ makeinstall_target() {
     cp ${PKG_DIR}/scripts/functions ${INSTALL}/usr/lib/libreelec
     cp ${PKG_DIR}/scripts/fs-resize ${INSTALL}/usr/lib/libreelec
     sed -e "s/@DISTRONAME@/${DISTRONAME}/g" \
+        -e "s/@EXT4_DEFAULT_SIZE@/${EXT4_DEFAULT_SIZE}/g" \
         -i ${INSTALL}/usr/lib/libreelec/fs-resize
 
     if listcontains "${FIRMWARE}" "rpi-eeprom"; then

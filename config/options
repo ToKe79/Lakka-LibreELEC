@@ -63,6 +63,9 @@ if [ -f "${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/options" ]; then
   . "${PROJECT_DIR}/${PROJECT}/devices/${DEVICE}/options"
 fi
 
+# default EXT4 partition size, if not set in distro / project / device options
+EXT4_DEFAULT_SIZE="${EXT4_DEFAULT_SIZE:-2048}"
+
 # read architecture defaults
 if [ -f "config/arch.${TARGET_ARCH}" ]; then
   . "config/arch.${TARGET_ARCH}"

@@ -1,6 +1,69 @@
 #!/bin/sh
 
+# copy user added files from EXFAT partition to the system locations
+copy_from_exfat() {
+
+  # if already done, we're done
+  [ -f /run/libreelec/copy_from_exfat_done ] && return
+
+  EXFAT_MOUNT=/storage/roms/EXFAT
+
+  EXFAT_DISK=$(mount | grep " ${EXFAT_MOUNT} " 2>/dev/null | cut -d' ' -f 1 2>/dev/null)
+  LOG=${EXFAT_MOUNT}/03_Transfer_done/transfer_log_$(date +%Y%m%d_%H%M%S).txt
+
+  # end early if there is no EXFAT partition ...
+  [ -z "${EXFAT_DISK}" ] && return
+
+  # ... or the EXFAT partition is not the 3rd partition on the disk ...
+  [ ${EXFAT_DISK: -1} -ne 3  ] && return
+
+  # ... or the partition does not have expected subfolder
+  if [ ! -d ${EXFAT_MOUNT}/02_Transfer ]; then
+    # but create folders first for the future
+    for subfolder in assets cores database joypads overlays shaders system ; do
+      mkdir -p ${EXFAT_MOUNT}/02_Transfer/${subfolder}
+    done
+    return
+  fi
+
+  # check for files in individual subfolders
+  for subfolder in assets cores database joypads overlays shaders system ; do
+
+    # skip if subfolder does not exist, but create empty one first for the future
+    if [ ! -d ${EXFAT_MOUNT}/02_Transfer/${subfolder} ]; then
+      mkdir -p ${EXFAT_MOUNT}/02_Transfer/${subfolder}
+      continue
+    fi
+
+    for item in ${EXFAT_MOUNT}/02_Transfer/${subfolder}/* ; do
+
+      # skip, if there are no files in the subfolder
+      [ ! -e "${item}" ] && continue
+
+      [ ! -d ${EXFAT_MOUNT}/03_Transfer_done/${subfolder} ] && mkdir -p ${EXFAT_MOUNT}/03_Transfer_done/${subfolder}
+
+      echo "Store '${item}' in /tmp/${subfolder}:" >>${LOG}
+      cp -vrf "${item}" /tmp/${subfolder} >>${LOG} 2>&1
+
+      echo "Backup '${item}' to ${EXFAT_MOUNT}/03_Transfer_done/${subfolder}:" >>${LOG}
+      cp -vrf "${item}" ${EXFAT_MOUNT}/03_Transfer_done/${subfolder} >>${LOG} 2>&1
+
+      echo "Remove '${item}':" >>${LOG}
+      rm -vrf "${item}" >>${LOG} 2>&1
+
+      echo -e "\n==================================================\n" >>${LOG}
+
+    done
+
+  done
+
+  touch /run/libreelec/copy_from_exfat_done
+}
+
 for i in 5 4 3 2 1 0; do [ -e /dev/snd/pcmC${i}D0p ] && export ALSA_CARD=$i; done
 
 echo "ALSA_CARD=\"$ALSA_CARD\"" > /run/libreelec/retroarch.conf
 echo "LD_LIBRARY_PATH=\"/usr/lib:/tmp/cores\"" >> /run/libreelec/retroarch.conf
+
+copy_from_exfat
+
