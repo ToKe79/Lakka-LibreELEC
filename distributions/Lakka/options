@@ -81,6 +81,10 @@
 # Size of storage partition, in MB. Must be >=32
   STORAGE_SIZE=32
 
+# Default size of ext4 partition when adding exFAT partition, in MB
+# value between 256 and 4096, multiple of 128
+  EXT4_DEFAULT_SIZE=2048
+
 # build with swap support (yes / no)
   SWAP_SUPPORT="yes"
 
