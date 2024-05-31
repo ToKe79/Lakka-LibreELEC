@@ -1,6 +1,9 @@
 # RPi-Composite xx.xx.xx
-* Picodrive: use upstream repository (fixes sound issue with some games)
+* Update RetroArch to [1.19.0](https://www.libretro.com/index.php/retroarch-1-19-0-release/)
 * RetroArch: save to default config file patch
+* Update libretro cores
+* picodrive: use upstream repository (fixes sound issue with some games)
+* Add new libretro core: `melonds-ds`
 
 # RPi-Composite 24.05.15
 * Update libretro cores
