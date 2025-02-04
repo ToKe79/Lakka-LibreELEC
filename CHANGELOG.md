@@ -1,9 +1,15 @@
-# RPi-Composite xx.xx.xx
-* Update RetroArch to [1.19.0](https://www.libretro.com/index.php/retroarch-1-19-0-release/)
+# RPi-Composite 25.02.05
+* Update RetroArch to [1.20.0](https://www.libretro.com/index.php/retroarch-1-20-0-release/)
 * RetroArch: save to default config file patch
 * Update libretro cores
 * picodrive: use upstream repository (fixes sound issue with some games)
 * Add new libretro core: `melonds-ds`
+* Enable `yabasanshiro` libretro core
+* Disable `mame` libretro core (requires GCC >= 10.3, we use 10.2)
+* Rollback `bluemsx` for RPi3/4
+* Drop RPi5 patch for `mupen64plus_next` (merged upstream)
+* Rollback `np2kai`
+* Rollback `stella`
 
 # RPi-Composite 24.05.15
 * Update libretro cores
