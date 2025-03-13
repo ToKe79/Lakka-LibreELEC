@@ -1,0 +1,13 @@
+diff --git a/src/citra_libretro/CMakeLists.txt b/src/citra_libretro/CMakeLists.txt
+index 151a690..21b3b3b 100644
+--- a/src/citra_libretro/CMakeLists.txt
++++ b/src/citra_libretro/CMakeLists.txt
+@@ -34,7 +34,7 @@ target_link_libraries(citra_libretro PRIVATE -static-libstdc++)
+ endif()
+ 
+ set_target_properties(citra_libretro PROPERTIES PREFIX "")
+-target_compile_definitions(citra_libretro PRIVATE HAVE_LIBRETRO)
++target_compile_definitions(citra_libretro PRIVATE HAVE_LIBRETRO USING_GLES)
+ 
+ if(ANDROID)
+   target_compile_definitions(citra_common PRIVATE HAVE_LIBRETRO_VFS)

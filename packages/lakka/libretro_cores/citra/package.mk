@@ -25,6 +25,7 @@ fi
 
 if [ "${OPENGLES_SUPPORT}" = "yes" ]; then
   PKG_DEPENDS_TARGET+=" ${OPENGLES}"
+  PKG_PATCH_DIRS+=" opengles"
 fi
 
 makeinstall_target() {
