@@ -1,0 +1,17 @@
+diff --git a/Makefile.libretro b/Makefile.libretro
+index 86ac4d8..8647a64 100644
+--- a/Makefile.libretro
++++ b/Makefile.libretro
+@@ -23,10 +23,10 @@ endif
+ all: $(NAME)
+ 
+ $(NAME): $(OFILES)
+-	g++ -shared -o $@$(SHARED_EXT) $(ARGS) $^ $(LIBS)
++	$(CXX) -shared $(CXXFLAGS) -o $@$(SHARED_EXT) $(ARGS) $^ $(LIBS)
+ 
+ $(BUILD)/%.o: %.cpp $(HFILES) $(BUILD)
+-	g++ -c -fPIC -o $@ $(ARGS) $(INCS) $<
++	$(CXX) -c -fPIC $(CXXFLAGS) -o $@ $(ARGS) $(INCS) $<
+ 
+ $(BUILD):
+ 	for dir in $(SRCS); do mkdir -p $(BUILD)/$$dir; done
